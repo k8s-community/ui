@@ -1,2 +1,2 @@
-# k8s-oauth-proxy
+# oauth-proxy
 Kubernetes auth proxy service
