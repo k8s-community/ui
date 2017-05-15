@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	client "github.com/google/go-github/github"
 	"github.com/takama/router"
 	"golang.org/x/oauth2"
@@ -13,14 +14,15 @@ import (
 
 // GitHubOAuth is a handler set to use GitHubOAuth features
 type GitHubOAuth struct {
-	State     string
-	OAuthConf *oauth2.Config
+	state     string
+	oAuthConf *oauth2.Config
+	log       logrus.FieldLogger
 }
 
 // NewGitHubOAuth create new GitHubOAuth handler set:
 // - state is a token to protect the user from CSRF attacks
 // - clientID and clientSecret are the parameters from github.com/settings/developers
-func NewGitHubOAuth(state, clientID, clientSecret string) *GitHubOAuth {
+func NewGitHubOAuth(log logrus.FieldLogger, state, clientID, clientSecret string) *GitHubOAuth {
 	conf := &oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
@@ -29,46 +31,55 @@ func NewGitHubOAuth(state, clientID, clientSecret string) *GitHubOAuth {
 	}
 
 	return &GitHubOAuth{
-		State:     state,
-		OAuthConf: conf,
+		state:     state,
+		oAuthConf: conf,
+		log:       log,
 	}
 }
 
 // Login is a handler to redirect to GitHub authorization page
 func (h *GitHubOAuth) Login(c *router.Control) {
-	url := h.OAuthConf.AuthCodeURL(h.State, oauth2.AccessTypeOnline)
+	url := h.oAuthConf.AuthCodeURL(h.state, oauth2.AccessTypeOnline)
 	http.Redirect(c.Writer, c.Request, url, http.StatusTemporaryRedirect)
 }
 
 // Callback is a handler to process authorization callback from GitHub
 func (h *GitHubOAuth) Callback(c *router.Control) {
 	state := c.Get("state")
-	if state != state {
-		// TODO: log invalid state
-		return
-	}
-
 	code := c.Get("code")
-	ctx := context.Background()
 
-	token, err := h.OAuthConf.Exchange(ctx, code)
-	if err != nil {
-		// TODO: Log exchange failed
+	if state != h.state {
+		h.log.Errorf("Wrong state %s with code %s", state, code)
+		http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
 		return
 	}
 
-	oauthClient := h.OAuthConf.Client(ctx, token)
+	ctx := context.Background()
+	token, err := h.oAuthConf.Exchange(ctx, code)
+
+	if err != nil {
+		h.log.Errorf("Exchange failed for code %s: %+v", code, err)
+		http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
+		return
+	}
+
+	oauthClient := h.oAuthConf.Client(ctx, token)
 	githubClient := client.NewClient(oauthClient)
 	user, _, err := githubClient.Users.Get(ctx, "")
 	if err != nil {
-		// TODO: Log 'can't get user'
+		h.log.Errorf("Couldn't get user for code %s: %+v", code, err)
+		http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
 		return
 	}
 
-	// TODO: log what user was logged in
+	h.log.Infof("User %d was authorized", user.Login)
 
 	go func() {
 		// Call User-Manager here
 		fmt.Println(user)
+
+		return
 	}()
+
+	http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"net/http"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/k8s-community/oauth-proxy/handlers"
 	"github.com/satori/go.uuid"
@@ -42,12 +44,14 @@ func main() {
 	// oauthState is a token to protect the user from CSRF attacks
 	oauthState := uuid.NewV4().String()
 
-	githubHandler := handlers.NewGitHubOAuth(oauthState, githubClientID, githubClientSecret)
+	githubHandler := handlers.NewGitHubOAuth(log, oauthState, githubClientID, githubClientSecret)
 
 	// TODO: add graceful shutdown
 
 	r := router.New()
-	r.GET("/oauth/login", githubHandler.Login)
+	r.Handler("GET", "/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
+	r.GET("/", handlers.Home(log))
+	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 
 	hostPort := fmt.Sprintf("%s:%s", serviceHost, servicePort)
