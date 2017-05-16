@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/icza/session"
 	"github.com/k8s-community/oauth-proxy/handlers"
 	"github.com/satori/go.uuid"
 	"github.com/takama/router"
@@ -14,6 +15,17 @@ import (
 
 func main() {
 	log := logrus.New()
+	log.Formatter = new(logrus.TextFormatter)
+	logger := log.WithFields(logrus.Fields{"service": "oauth-proxy"})
+
+	// Session manager settings: temporary solution
+	session.Global.Close()
+	cookieMngrOptions := &session.CookieMngrOptions{
+		SessIDCookieName: "k8s-community-session-id",
+		AllowHTTP:        true,
+		CookieMaxAge:     48 * time.Hour,
+	}
+	session.Global = session.NewCookieManagerOptions(session.NewInMemStore(), cookieMngrOptions)
 
 	var errors []error
 
@@ -38,24 +50,24 @@ func main() {
 	}
 
 	if len(errors) > 0 {
-		log.Fatalf("Couldn't start service because required parameters are not set: %+v", errors)
+		logger.Fatalf("Couldn't start service because required parameters are not set: %+v", errors)
 	}
 
 	// oauthState is a token to protect the user from CSRF attacks
 	oauthState := uuid.NewV4().String()
 
-	githubHandler := handlers.NewGitHubOAuth(log, oauthState, githubClientID, githubClientSecret)
+	githubHandler := handlers.NewGitHubOAuth(logger, oauthState, githubClientID, githubClientSecret)
 
 	// TODO: add graceful shutdown
 
 	r := router.New()
 	r.Handler("GET", "/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
-	r.GET("/", handlers.Home(log))
+	r.GET("/", handlers.Home(logger))
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 
 	hostPort := fmt.Sprintf("%s:%s", serviceHost, servicePort)
-	log.Infof("Ready to listen %s\nRoutes: %+v", hostPort, r.Routes())
+	logger.Infof("Ready to listen %s\nRoutes: %+v", hostPort, r.Routes())
 	r.Listen(hostPort)
 }
 

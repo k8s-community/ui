@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	client "github.com/google/go-github/github"
+	"github.com/icza/session"
 	"github.com/takama/router"
 	"golang.org/x/oauth2"
 	oAuth "golang.org/x/oauth2/github"
@@ -66,19 +67,29 @@ func (h *GitHubOAuth) Callback(c *router.Control) {
 	oauthClient := h.oAuthConf.Client(ctx, token)
 	githubClient := client.NewClient(oauthClient)
 	user, _, err := githubClient.Users.Get(ctx, "")
-	if err != nil {
+	if err != nil || user.Login == nil {
 		h.log.Errorf("Couldn't get user for code %s: %+v", code, err)
 		http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
 		return
 	}
 
-	h.log.Infof("User %d was authorized", user.Login)
+	h.log.WithField("user", *user.Login).Info("GitHub user was authorized in oauth-proxy")
+
+	sessionData := session.NewSessionOptions(&session.SessOptions{
+		CAttrs: map[string]interface{}{"Login": *user.Login},
+		Attrs:  map[string]interface{}{"Activated": false},
+	})
+	session.Add(sessionData, c.Writer)
+	userFields := logrus.Fields{"user": *user.Login, "session": sessionData.ID()}
+	h.log.WithFields(userFields).Infof("Session was created")
 
 	go func() {
-		// Call User-Manager here
-		fmt.Println(user)
+		// Call User-Manager instead of sleep
+		time.Sleep(5 * time.Second)
 
-		return
+		h.log.WithField("user", *user.Login).Info("GitHub user was activated in Kubernetes")
+		sessionData.SetAttr("Activated", true)
+		h.log.WithFields(userFields).Infof("Session was updated: set 'activated' value")
 	}()
 
 	http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
