@@ -1,2 +1,5 @@
 static
 templates
+vendor
+oauth-proxy
+glide.lock
