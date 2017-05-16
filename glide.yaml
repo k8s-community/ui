@@ -15,3 +15,5 @@ import:
   - github
 - package: github.com/k8s-community/k8s-community
   version: ~0.0.1
+- package: github.com/k8s-community/handlers
+  version: ~0.0.1

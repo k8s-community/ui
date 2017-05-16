@@ -8,7 +8,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
+	common_handlers "github.com/k8s-community/handlers"
 	"github.com/k8s-community/oauth-proxy/handlers"
+	"github.com/k8s-community/oauth-proxy/version"
 	"github.com/satori/go.uuid"
 	"github.com/takama/router"
 )
@@ -65,6 +67,13 @@ func main() {
 	r.GET("/", handlers.Home(logger))
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
+
+	r.GET("/info", func(c *router.Control) {
+		common_handlers.Info(c, version.RELEASE, version.REPO, version.COMMIT)
+	})
+	r.GET("/healthz", func(c *router.Control) {
+		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))
+	})
 
 	hostPort := fmt.Sprintf("%s:%s", serviceHost, servicePort)
 	logger.Infof("Ready to listen %s\nRoutes: %+v", hostPort, r.Routes())
