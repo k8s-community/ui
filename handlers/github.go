@@ -27,7 +27,7 @@ func NewGitHubOAuth(log logrus.FieldLogger, state, clientID, clientSecret string
 	conf := &oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		Scopes:       []string{"user"},
+		Scopes:       []string{},
 		Endpoint:     oAuth.Endpoint,
 	}
 
