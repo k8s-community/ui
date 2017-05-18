@@ -4,16 +4,23 @@ BUILDTAGS=
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
 APP?=oauth-proxy
-PROJECT?=github.com/k8s-community/oauth-proxy
-RELEASE?=0.0.2
+CHARTS?=charts
+USERSPACE?=k8s-community
+RELEASE?=0.0.3
+PROJECT?=github.com/${USERSPACE}/${APP}
+HELM_REPO?=https://${USERSPACE}.github.io/${CHARTS}
 GOOS?=linux
-REPOSITORY?=community-charts
 REGISTRY?=registry.k8s.community
 SERVICE_PORT?=8080
 
 NAMESPACE?=k8s-community
 PREFIX?=${REGISTRY}/${NAMESPACE}/${APP}
 CONTAINER_NAME?=${APP}-${NAMESPACE}
+
+ifeq ($(NAMESPACE), default)
+	PREFIX=${REGISTRY}/${APP}
+	CONTAINER_NAME=${APP}
+endif
 
 REPO_INFO=$(shell git config --get remote.origin.url)
 
@@ -37,13 +44,14 @@ push: container
 	docker push $(PREFIX):$(RELEASE)
 
 run: container
-	docker run --name ${CONTAINER_NAME} -p ${SERVICE_PORT}:${SERVICE_PORT} \
-		-e "SERVICE_PORT=${SERVICE_PORT}" \
+	docker run --name ${CONTAINER_NAME} -p ${MYAPP_SERVICE_PORT}:${MYAPP_SERVICE_PORT} \
+		-e "MYAPP_SERVICE_PORT=${MYAPP_SERVICE_PORT}" \
 		-d $(PREFIX):$(RELEASE)
 
 deploy: push
-	helm repo up \
-    && helm upgrade ${CONTAINER_NAME} ${REPOSITORY}/${APP} --namespace ${NAMESPACE} --set image.tag=${RELEASE} -i --wait
+	helm repo add ${USERSPACE} ${HELM_REPO} \
+	&& helm repo up \
+    && helm upgrade ${CONTAINER_NAME} ${USERSPACE}/${APP} --namespace ${NAMESPACE} --set image.tag=${RELEASE} -i --wait
 
 fmt:
 	@echo "+ $@"
