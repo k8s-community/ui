@@ -44,8 +44,8 @@ push: container
 	docker push $(PREFIX):$(RELEASE)
 
 run: container
-	docker run --name ${CONTAINER_NAME} -p ${MYAPP_SERVICE_PORT}:${MYAPP_SERVICE_PORT} \
-		-e "MYAPP_SERVICE_PORT=${MYAPP_SERVICE_PORT}" \
+	docker run --name ${CONTAINER_NAME} -p ${SERVICE_PORT}:${SERVICE_PORT} \
+		-e "SERVICE_PORT=${SERVICE_PORT}" \
 		-d $(PREFIX):$(RELEASE)
 
 deploy: push
