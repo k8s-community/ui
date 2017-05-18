@@ -5,7 +5,7 @@ BUILDTAGS=
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
 APP?=oauth-proxy
 PROJECT?=github.com/k8s-community/oauth-proxy
-RELEASE?=0.0.0
+RELEASE?=0.0.2
 GOOS?=linux
 REPOSITORY?=community-charts
 REGISTRY?=registry.k8s.community
