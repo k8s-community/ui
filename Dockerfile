@@ -8,7 +8,7 @@ ENV SERVICE_PORT 8080
 ENV GITHUB_CLIENT_ID f778...
 ENV GITHUB_CLIENT_SECRET 807ff71...
 
-CMD apk --no-cache add ca-certificates && update-ca-certificates
+RUN apk --no-cache add ca-certificates && update-ca-certificates
 
 COPY vendor/github.com/k8s-community/k8s-community/static /static
 COPY vendor/github.com/k8s-community/k8s-community/templates /templates
