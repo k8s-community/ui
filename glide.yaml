@@ -6,6 +6,7 @@ import:
   subpackages:
   - github
 - package: github.com/icza/session
+  version: ^1.1.0
 - package: github.com/satori/go.uuid
   version: v1.1.0
 - package: github.com/takama/router
@@ -14,6 +15,6 @@ import:
   subpackages:
   - github
 - package: github.com/k8s-community/k8s-community
-  version: ~0.0.1
+  version: ^0.0.2
 - package: github.com/k8s-community/handlers
-  version: ~0.0.1
+  version: ^0.0.1
