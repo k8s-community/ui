@@ -6,7 +6,7 @@ BUILDTAGS=
 APP?=oauth-proxy
 CHARTS?=charts
 USERSPACE?=k8s-community
-RELEASE?=0.0.7
+RELEASE?=0.0.8
 PROJECT?=github.com/${USERSPACE}/${APP}
 HELM_REPO?=https://services.k8s.community/charts
 GOOS?=linux
@@ -44,8 +44,8 @@ push: container
 	docker push $(PREFIX):$(RELEASE)
 
 run: container
-	docker run --name ${CONTAINER_NAME} -p ${MYAPP_SERVICE_PORT}:${MYAPP_SERVICE_PORT} \
-		-e "MYAPP_SERVICE_PORT=${MYAPP_SERVICE_PORT}" \
+	docker run --name ${CONTAINER_NAME} -p ${SERVICE_PORT}:${SERVICE_PORT} \
+		-e "SERVICE_PORT=${SERVICE_PORT}" \
 		-d $(PREFIX):$(RELEASE)
 
 deploy: push
