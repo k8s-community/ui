@@ -8,10 +8,12 @@ ENV SERVICE_PORT 8080
 ENV GITHUB_CLIENT_ID f778...
 ENV GITHUB_CLIENT_SECRET 807ff71...
 
-EXPOSE $SERVICE_PORT
+apk --no-cache add ca-certificates && update-ca-certificates
 
 COPY vendor/github.com/k8s-community/k8s-community/static /static
 COPY vendor/github.com/k8s-community/k8s-community/templates /templates
 COPY oauth-proxy /
+
+EXPOSE $SERVICE_PORT
 
 CMD ["/oauth-proxy"]
