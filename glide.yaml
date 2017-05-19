@@ -18,3 +18,7 @@ import:
   version: ^0.0.2
 - package: github.com/k8s-community/handlers
   version: ^0.0.1
+- package: github.com/k8s-community/user-manager
+  version: ~0.1.0
+  subpackages:
+  - client
