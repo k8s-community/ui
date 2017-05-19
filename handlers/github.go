@@ -102,7 +102,7 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session) {
 		return
 	}
 
-	logger.Info("Status from user-manager service is: %d", status)
+	logger.Infof("Status from user-manager service is: %d", status)
 
 	sessionData.SetAttr("Activated", true)
 	sessionData.SetAttr("HasError", false)
