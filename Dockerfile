@@ -4,6 +4,8 @@ FROM alpine:3.5
 ENV SERVICE_HOST 0.0.0.0
 ENV SERVICE_PORT 8080
 
+ENV USERMAN_BASE_URL http://user-manager-v0
+
 # additional env parameters
 ENV GITHUB_CLIENT_ID f778...
 ENV GITHUB_CLIENT_SECRET 807ff71...
