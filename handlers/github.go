@@ -3,38 +3,40 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/Sirupsen/logrus"
-	client "github.com/google/go-github/github"
+	ghClient "github.com/google/go-github/github"
 	"github.com/icza/session"
+	umClient "github.com/k8s-community/user-manager/client"
 	"github.com/takama/router"
 	"golang.org/x/oauth2"
-	oAuth "golang.org/x/oauth2/github"
+	ghOAuth "golang.org/x/oauth2/github"
 )
 
 // GitHubOAuth is a handler set to use GitHubOAuth features
 type GitHubOAuth struct {
-	state     string
-	oAuthConf *oauth2.Config
-	log       logrus.FieldLogger
+	state         string
+	oAuthConf     *oauth2.Config
+	log           logrus.FieldLogger
+	usermanClient *umClient.Client
 }
 
 // NewGitHubOAuth create new GitHubOAuth handler set:
 // - state is a token to protect the user from CSRF attacks
 // - clientID and clientSecret are the parameters from github.com/settings/developers
-func NewGitHubOAuth(log logrus.FieldLogger, state, clientID, clientSecret string) *GitHubOAuth {
+func NewGitHubOAuth(log logrus.FieldLogger, umClient *umClient.Client, state, ghClientID, ghClientSecret string) *GitHubOAuth {
 	conf := &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
+		ClientID:     ghClientID,
+		ClientSecret: ghClientSecret,
 		Scopes:       []string{},
-		Endpoint:     oAuth.Endpoint,
+		Endpoint:     ghOAuth.Endpoint,
 	}
 
 	return &GitHubOAuth{
-		state:     state,
-		oAuthConf: conf,
-		log:       log,
+		state:         state,
+		oAuthConf:     conf,
+		log:           log,
+		usermanClient: umClient,
 	}
 }
 
@@ -65,7 +67,7 @@ func (h *GitHubOAuth) Callback(c *router.Control) {
 	}
 
 	oauthClient := h.oAuthConf.Client(ctx, token)
-	githubClient := client.NewClient(oauthClient)
+	githubClient := ghClient.NewClient(oauthClient)
 	user, _, err := githubClient.Users.Get(ctx, "")
 	if err != nil || user.Login == nil {
 		h.log.Errorf("Couldn't get user for code %s: %+v", code, err)
@@ -77,20 +79,30 @@ func (h *GitHubOAuth) Callback(c *router.Control) {
 
 	sessionData := session.NewSessionOptions(&session.SessOptions{
 		CAttrs: map[string]interface{}{"Login": *user.Login},
-		Attrs:  map[string]interface{}{"Activated": false},
+		Attrs:  map[string]interface{}{"Activated": false, "HasError": false},
 	})
 	session.Add(sessionData, c.Writer)
-	userFields := logrus.Fields{"user": *user.Login, "session": sessionData.ID()}
-	h.log.WithFields(userFields).Infof("Session was created")
 
-	go func() {
-		// Call User-Manager instead of sleep
-		time.Sleep(5 * time.Second)
-
-		h.log.WithField("user", *user.Login).Info("GitHub user was activated in Kubernetes")
-		sessionData.SetAttr("Activated", true)
-		h.log.WithFields(userFields).Infof("Session was updated: set 'activated' value")
-	}()
+	go h.syncUser(*user.Login, sessionData)
 
 	http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
+}
+
+func (h *GitHubOAuth) syncUser(login string, sessionData session.Session) {
+	logger := h.log.WithFields(logrus.Fields{"user": login, "session": sessionData.ID()})
+	logger.Infof("Session was created")
+
+	user := umClient.NewUser(login)
+	err := h.usermanClient.User.Sync(*user)
+
+	if err != nil {
+		logger.Info("Error during user Kubernetes sync: %+v", err)
+		sessionData.SetAttr("Activated", false)
+		sessionData.SetAttr("HasError", true)
+		return
+	}
+
+	sessionData.SetAttr("Activated", true)
+	sessionData.SetAttr("HasError", false)
+	logger.Infof("Session was updated: set 'activated' value")
 }

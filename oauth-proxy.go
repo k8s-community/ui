@@ -11,6 +11,7 @@ import (
 	common_handlers "github.com/k8s-community/handlers"
 	"github.com/k8s-community/oauth-proxy/handlers"
 	"github.com/k8s-community/oauth-proxy/version"
+	umClient "github.com/k8s-community/user-manager/client"
 	"github.com/satori/go.uuid"
 	"github.com/takama/router"
 )
@@ -41,6 +42,11 @@ func main() {
 		errors = append(errors, err)
 	}
 
+	usermanBaseURL, err := getFromEnv("USERMAN_BASE_URL")
+	if err != nil {
+		errors = append(errors, err)
+	}
+
 	githubClientID, err := getFromEnv("GITHUB_CLIENT_ID")
 	if err != nil {
 		errors = append(errors, err)
@@ -55,10 +61,16 @@ func main() {
 		logger.Fatalf("Couldn't start service because required parameters are not set: %+v", errors)
 	}
 
+	// Init user-manager client to be able to create user in Kubernetes
+	usermanClient, err := umClient.NewClient(nil, usermanBaseURL)
+	if err != nil {
+		logger.Fatalf("Couldn't get an instance of user-manager's service client: %+v", err)
+	}
+
 	// oauthState is a token to protect the user from CSRF attacks
 	oauthState := uuid.NewV4().String()
 
-	githubHandler := handlers.NewGitHubOAuth(logger, oauthState, githubClientID, githubClientSecret)
+	githubHandler := handlers.NewGitHubOAuth(logger, usermanClient, oauthState, githubClientID, githubClientSecret)
 
 	// TODO: add graceful shutdown
 
