@@ -9,6 +9,7 @@ ENV USERMAN_BASE_URL https://services.k8s.community/user-manager
 # additional env parameters
 ENV GITHUB_CLIENT_ID f778...
 ENV GITHUB_CLIENT_SECRET 807ff71...
+ENV K8S_GUEST_TOKEN XXXXXX
 
 RUN apk --no-cache add ca-certificates && update-ca-certificates
 

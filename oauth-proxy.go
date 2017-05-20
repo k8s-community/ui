@@ -57,6 +57,11 @@ func main() {
 		errors = append(errors, err)
 	}
 
+	k8sGuestToken, err := getFromEnv("K8S_GUEST_TOKEN")
+	if err != nil {
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		logger.Fatalf("Couldn't start service because required parameters are not set: %+v", errors)
 	}
@@ -76,7 +81,7 @@ func main() {
 
 	r := router.New()
 	r.Handler("GET", "/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
-	r.GET("/", handlers.Home(logger))
+	r.GET("/", handlers.Home(logger, k8sGuestToken))
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 

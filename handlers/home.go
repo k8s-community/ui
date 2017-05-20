@@ -9,7 +9,7 @@ import (
 )
 
 // Home handles homepage request
-func Home(log logrus.FieldLogger) router.Handle {
+func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 	return func(c *router.Control) {
 		t, err := template.ParseFiles("templates/layout.html", "templates/index.html")
 
@@ -21,8 +21,10 @@ func Home(log logrus.FieldLogger) router.Handle {
 			GitHubSignInLink string // link to sign in to GitHub
 			Login            string // user's login
 			Activated        bool   // is user activated in k8s
+			GuestToken       string // a token to reach Kubernetes
 		}{
 			GitHubSignInLink: "/oauth/github",
+			GuestToken:       k8sToken,
 		}
 
 		// Check if user have already logged in
