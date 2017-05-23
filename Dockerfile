@@ -15,8 +15,8 @@ RUN apk --no-cache add ca-certificates && update-ca-certificates
 
 COPY vendor/github.com/k8s-community/k8s-community/static /static
 COPY vendor/github.com/k8s-community/k8s-community/templates /templates
-COPY oauth-proxy /
+COPY k8s-community /
 
 EXPOSE $SERVICE_PORT
 
-CMD ["/oauth-proxy"]
+CMD ["/k8s-community"]

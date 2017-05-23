@@ -1,4 +1,4 @@
-package: github.com/k8s-community/oauth-proxy
+package: github.com/k8s-community/k8s-community
 import:
 - package: github.com/Sirupsen/logrus
   version: v0.11.5

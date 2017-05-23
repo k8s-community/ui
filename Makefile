@@ -3,7 +3,7 @@ all: push
 BUILDTAGS=
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-APP?=oauth-proxy
+APP?=k8s-community
 CHARTS?=charts
 USERSPACE?=k8s-community
 RELEASE?=0.0.18
