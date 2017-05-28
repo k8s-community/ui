@@ -28,7 +28,6 @@ func NewGitHubOAuth(log logrus.FieldLogger, umClient *umClient.Client, state, gh
 	conf := &oauth2.Config{
 		ClientID:     ghClientID,
 		ClientSecret: ghClientSecret,
-		Scopes:       []string{},
 		Endpoint:     ghOAuth.Endpoint,
 	}
 
