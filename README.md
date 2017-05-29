@@ -19,7 +19,13 @@ To run the service you need to define these environment variables:
 For example, you can run service using `make run` (not for production, only for experiment!):
 
 
-    env SERVICE_HOST=0.0.0.0 SERVICE_PORT=80 GITHUB_CLIENT_ID=f778... GITHUB_CLIENT_SECRET=807ff71... go run oauth-proxy.go
+    env SERVICE_HOST=0.0.0.0 SERVICE_PORT=80 \
+    GITHUB_CLIENT_ID=f778... GITHUB_CLIENT_SECRET=807ff71... \
+    COCKROACHDB_SERVICE_HOST=localhost COCKROACHDB_SERVICE_PORT=26257 \
+    COCKROACHDB_USER=k8scomm COCKROACHDB_PASSWORD=k8scomm COCKROACHDB_NAME=k8s_community \
+    K8S_GUEST_TOKEN=12345 \
+    USERMAN_BASE_URL=https://services.k8s.community/user-manager \
+    go run k8s-community.go
 
 
 **TODO:** Add link to chart with configuration description.
