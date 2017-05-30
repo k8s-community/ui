@@ -31,12 +31,12 @@ func main() {
 	var errors []error
 
 	// Database settings
-	dbHost, err := getFromEnv("COCKROACHDB_SERVICE_HOST")
+	dbHost, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_HOST")
 	if err != nil {
 		errors = append(errors, err)
 	}
 
-	dbPort, err := getFromEnv("COCKROACHDB_SERVICE_PORT")
+	dbPort, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_PORT")
 	if err != nil {
 		errors = append(errors, err)
 	}
