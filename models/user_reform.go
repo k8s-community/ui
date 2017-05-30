@@ -1,6 +1,6 @@
 package models
 
-// Generated with gopkg.in/reform.v1. Do not edit by hand.
+// generated with gopkg.in/reform.v1
 
 import (
 	"fmt"
@@ -47,7 +47,7 @@ func (v *userTableType) PKColumnIndex() uint {
 
 // UserTable represents users view or table in SQL database.
 var UserTable = &userTableType{
-	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "users", Fields: []parse.FieldInfo{{Name: "ID", Type: "int64", Column: "id"}, {Name: "Name", Type: "string", Column: "name"}, {Name: "Source", Type: "string", Column: "source"}, {Name: "SessionID", Type: "*string", Column: "session_id"}, {Name: "SessionData", Type: "*string", Column: "session_data"}, {Name: "CreatedAt", Type: "time.Time", Column: "created_at"}, {Name: "UpdatedAt", Type: "time.Time", Column: "updated_at"}}, PKFieldIndex: 0},
+	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "users", Fields: []parse.FieldInfo{{Name: "ID", PKType: "int64", Column: "id"}, {Name: "Name", PKType: "", Column: "name"}, {Name: "Source", PKType: "", Column: "source"}, {Name: "SessionID", PKType: "", Column: "session_id"}, {Name: "SessionData", PKType: "", Column: "session_data"}, {Name: "CreatedAt", PKType: "", Column: "created_at"}, {Name: "UpdatedAt", PKType: "", Column: "updated_at"}}, PKFieldIndex: 0},
 	z: new(User).Values(),
 }
 
@@ -131,10 +131,10 @@ func (s *User) SetPK(pk interface{}) {
 // check interfaces
 var (
 	_ reform.View   = UserTable
-	_ reform.Struct = (*User)(nil)
+	_ reform.Struct = new(User)
 	_ reform.Table  = UserTable
-	_ reform.Record = (*User)(nil)
-	_ fmt.Stringer  = (*User)(nil)
+	_ reform.Record = new(User)
+	_ fmt.Stringer  = new(User)
 )
 
 func init() {
