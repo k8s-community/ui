@@ -7,6 +7,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	ghClient "github.com/google/go-github/github"
 	"github.com/icza/session"
+	"github.com/k8s-community/k8s-community/models"
 	umClient "github.com/k8s-community/user-manager/client"
 	"github.com/takama/router"
 	"golang.org/x/oauth2"
@@ -28,7 +29,6 @@ func NewGitHubOAuth(log logrus.FieldLogger, umClient *umClient.Client, state, gh
 	conf := &oauth2.Config{
 		ClientID:     ghClientID,
 		ClientSecret: ghClientSecret,
-		Scopes:       []string{},
 		Endpoint:     ghOAuth.Endpoint,
 	}
 
@@ -78,17 +78,17 @@ func (h *GitHubOAuth) Callback(c *router.Control) {
 	h.log.WithField("user", *user.Login).Info("GitHub user was authorized in oauth-proxy")
 
 	sessionData := session.NewSessionOptions(&session.SessOptions{
-		CAttrs: map[string]interface{}{"Login": *user.Login},
+		CAttrs: map[string]interface{}{"Login": *user.Login, "Source": models.SourceGitHub},
 		Attrs:  map[string]interface{}{"Activated": false, "HasError": false},
 	})
 	session.Add(sessionData, c.Writer)
 
-	go h.syncUser(*user.Login, sessionData)
+	go h.syncUser(*user.Login, sessionData, c.Writer)
 
 	http.Redirect(c.Writer, c.Request, "/", http.StatusMovedPermanently)
 }
 
-func (h *GitHubOAuth) syncUser(login string, sessionData session.Session) {
+func (h *GitHubOAuth) syncUser(login string, sessionData session.Session, w http.ResponseWriter) {
 	logger := h.log.WithFields(logrus.Fields{"user": login, "session": sessionData.ID()})
 	logger.Infof("Session was created")
 
@@ -99,6 +99,7 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session) {
 		logger.Info("Error during user Kubernetes sync: %+v", err)
 		sessionData.SetAttr("Activated", false)
 		sessionData.SetAttr("HasError", true)
+		session.Add(sessionData, w)
 		return
 	}
 
@@ -106,5 +107,7 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session) {
 
 	sessionData.SetAttr("Activated", true)
 	sessionData.SetAttr("HasError", false)
+	session.Add(sessionData, w)
+
 	logger.Infof("Session was updated: set 'activated' value")
 }

@@ -1,27 +1,9 @@
-# oauth-proxy
+# k8s-community
 
-OAuth Proxy Service.
+Install our application on GitHub and we'll deliver your services to Kubernetes.
 
 You can use this service to create users and necessary environment.
 Right now it supports only GitHub.
-
-## Getting Started
-
-You can store page templates in `/templates` and static files (images, css etc.) in `/static` directories.
-
-For example, you can checkout our [Landing Page](https://github.com/k8s-community/k8s-community).
-In this case please follow this instruction:
- 
-1. Get static and template files: `go get -u github.com/k8s-community/k8s-community`.
-
-2. Get this service: `go get -u github.com/k8s-community/oauth-proxy`.
-
-3. Make symbolic links to `static` and `template` directories:
-
-        ln -s $GOPATH/src/github.com/k8s-community/k8s-community/static ./static
-        ln -s $GOPATH/src/github.com/k8s-community/k8s-community/templates ./templates
-    
-Otherwise, you can just create empty `static` and `template directories` and define necessary files yourself.
 
 ## How to run the service
 
@@ -37,7 +19,13 @@ To run the service you need to define these environment variables:
 For example, you can run service using `make run` (not for production, only for experiment!):
 
 
-    env SERVICE_HOST=0.0.0.0 SERVICE_PORT=80 GITHUB_CLIENT_ID=f778... GITHUB_CLIENT_SECRET=807ff71... go run oauth-proxy.go
+    env SERVICE_HOST=0.0.0.0 SERVICE_PORT=80 \
+    GITHUB_CLIENT_ID=f778... GITHUB_CLIENT_SECRET=807ff71... \
+    COCKROACHDB_SERVICE_HOST=localhost COCKROACHDB_SERVICE_PORT=26257 \
+    COCKROACHDB_USER=k8scomm COCKROACHDB_PASSWORD=k8scomm COCKROACHDB_NAME=k8s_community \
+    K8S_GUEST_TOKEN=12345 \
+    USERMAN_BASE_URL=https://services.k8s.community/user-manager \
+    go run k8s-community.go
 
 
 **TODO:** Add link to chart with configuration description.

@@ -1,4 +1,4 @@
-package: github.com/k8s-community/oauth-proxy
+package: github.com/k8s-community/k8s-community
 import:
 - package: github.com/Sirupsen/logrus
   version: v0.11.5
@@ -14,8 +14,6 @@ import:
 - package: golang.org/x/oauth2
   subpackages:
   - github
-- package: github.com/k8s-community/k8s-community
-  version: ^0.0.3
 - package: github.com/k8s-community/handlers
   version: ^0.0.1
 - package: github.com/k8s-community/user-manager

@@ -1,0 +1,64 @@
+{{ define "content" }}
+
+{{ if .Login }}
+
+<div>
+    <p>Вы авторизованы как <b>{{ .Login }}</b>.</p>
+
+    {{ if .Activated }}
+        <p>Окружение в Kubernetes успешно создано.</p>
+
+        <p>
+            Для успешной работы с <code>kubectl</code>, пожалуйста, задайте конфиг в файле <code>~/.kube/config</code>,
+            где <code>~</code> - ваша директория <code>%USERPROFILE%</code>, если у вас Windows,
+            или ваша директория <code>HOME</code>, если у вас Linux / macOS и т. д.
+        </p>
+
+        <pre>
+    apiVersion: v1
+    kind: Config
+    clusters:
+    - cluster:
+        server: https://master.k8s.community
+      name: master-class
+    contexts:
+    - context:
+        cluster: master-class
+        user: master-class
+      name: master-class
+    current-context: master-class
+    users:
+    - name: master-class
+      user:
+        token: {{ .GuestToken }}
+        </pre>
+
+
+        <p>Некоторые ссылки, которые пригодятся для дальнейшего прохождения мастер-класса:</p>
+
+        <ul>
+            <li><a href="https://github.com/k8s-community/mycharts">mycharts</a> - базовый репозиторий с чартами для форка в свой профиль</li>
+            <li><a href="https://github.com/k8s-community/myapp">myapp</a> - базовый сервис для форка в свой профиль</li>
+            <li><a href="https://github.com/integration/k8s">k8s integration</a> - GitHub integration, которую надо задать на репозиторий для работы с CI/CD</a></li>
+        </ul>
+
+    {{ else }}
+        <p>
+            Окружение в Kubernetes находится в процессе приготовления.
+            Пожалуйста, обновите эту страницу, чтобы проверить статус готовности.
+        </p>
+    {{ end }}
+
+</div>
+
+{{ else }}
+
+<div style="align-content: center">
+    <a href="{{ .GitHubSignInLink }}">
+        <img src="./static/img/github-64px.png" />
+    </a>
+</div>
+
+{{ end }}
+
+{{ end }}
