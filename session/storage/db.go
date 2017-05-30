@@ -8,7 +8,7 @@ import (
 	"github.com/icza/session"
 	"github.com/k8s-community/k8s-community/models"
 	"gopkg.in/reform.v1"
-	"k8s.io/kubernetes/pkg/util/json"
+	"encoding/json"
 )
 
 type SessionAttrs struct {
