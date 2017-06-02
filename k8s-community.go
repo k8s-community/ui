@@ -15,7 +15,6 @@ import (
 	"github.com/k8s-community/k8s-community/version"
 	umClient "github.com/k8s-community/user-manager/client"
 	_ "github.com/lib/pq" // postgresql driver
-	"github.com/satori/go.uuid"
 	"github.com/takama/router"
 	"gopkg.in/reform.v1"
 	"gopkg.in/reform.v1/dialects/postgresql"
@@ -105,6 +104,12 @@ func main() {
 		errors = append(errors, err)
 	}
 
+	// oauthState is a token to protect the user from CSRF attacks
+	oauthState, err := getFromEnv("GITHUB_OAUTH_STATE")
+	if err != nil {
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		logger.Fatalf("Couldn't start service because required parameters are not set: %+v", errors)
 	}
@@ -114,9 +119,6 @@ func main() {
 	if err != nil {
 		logger.Fatalf("Couldn't get an instance of user-manager's service client: %+v", err)
 	}
-
-	// oauthState is a token to protect the user from CSRF attacks
-	oauthState := uuid.NewV4().String()
 
 	githubHandler := handlers.NewGitHubOAuth(logger, usermanClient, oauthState, githubClientID, githubClientSecret)
 
