@@ -130,6 +130,10 @@ func main() {
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 
+	r.GET("/builds/:id", func(c *router.Control) {
+		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))
+	})
+
 	r.GET("/info", func(c *router.Control) {
 		common_handlers.Info(c, version.RELEASE, version.REPO, version.COMMIT)
 	})
