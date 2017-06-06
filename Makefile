@@ -13,7 +13,7 @@ GOOS?=linux
 REGISTRY?=registry.k8s.community
 SERVICE_PORT?=8080
 
-NAMESPACE?=k8s-community
+NAMESPACE?=default
 PREFIX?=${REGISTRY}/${NAMESPACE}/${APP}
 CONTAINER_NAME?=${APP}-${NAMESPACE}
 
