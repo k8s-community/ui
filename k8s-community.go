@@ -10,9 +10,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
 	common_handlers "github.com/k8s-community/handlers"
-	"github.com/k8s-community/k8s-community/handlers"
-	"github.com/k8s-community/k8s-community/session/storage"
-	"github.com/k8s-community/k8s-community/version"
+	"github.com/k8s-community/ui/handlers"
+	"github.com/k8s-community/ui/session/storage"
+	"github.com/k8s-community/ui/version"
 	umClient "github.com/k8s-community/user-manager/client"
 	_ "github.com/lib/pq" // postgresql driver
 	"github.com/takama/router"

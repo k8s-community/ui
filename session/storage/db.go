@@ -6,7 +6,7 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
-	"github.com/k8s-community/k8s-community/models"
+	"github.com/k8s-community/ui/models"
 	"gopkg.in/reform.v1"
 	"encoding/json"
 )
