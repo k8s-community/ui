@@ -20,3 +20,7 @@ import:
   version: ~0.1.3
   subpackages:
   - client
+- package: github.com/openprovider/handlers
+  version: ^0.1.1
+  subpackages:
+  - info
