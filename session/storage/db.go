@@ -3,12 +3,12 @@ package storage
 import (
 	"sync"
 
+	"encoding/json"
 	"github.com/AlekSi/pointer"
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
 	"github.com/k8s-community/ui/models"
 	"gopkg.in/reform.v1"
-	"encoding/json"
 )
 
 type SessionAttrs struct {

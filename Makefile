@@ -2,25 +2,25 @@ all: push
 
 BUILDTAGS=
 
-# Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
 APP?=ui
-CHARTS?=charts
-USERSPACE?=k8s-community
-RELEASE?=0.1.5
-PROJECT?=github.com/${USERSPACE}/${APP}
-HELM_REPO?=https://services.k8s.community/charts
-GOOS?=linux
+PROJECT?=github.com/k8s-community/${APP}
 REGISTRY?=registry.k8s.community
+CA_DIR?=certs
+
+# Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
+RELEASE?=0.1.5
+GOOS?=linux
+GOARCH?=amd64
+
 SERVICE_PORT?=8080
 
-NAMESPACE?=default
-PREFIX?=${REGISTRY}/${NAMESPACE}/${APP}
-CONTAINER_NAME?=${APP}-${NAMESPACE}
+NAMESPACE?=k8s-community
+INFRASTRUCTURE?=stable
+KUBE_CONTEXT?=inventory
+VALUES?=values-${INFRASTRUCTURE}
 
-ifeq ($(NAMESPACE), default)
-	PREFIX=${REGISTRY}/${APP}
-	CONTAINER_NAME=${APP}
-endif
+CONTAINER_IMAGE?=${REGISTRY}/${NAMESPACE}/${APP}
+CONTAINER_NAME?=${APP}-${NAMESPACE}
 
 REPO_INFO=$(shell git config --get remote.origin.url)
 
@@ -28,50 +28,94 @@ ifndef COMMIT
 	COMMIT := git-$(shell git rev-parse --short HEAD)
 endif
 
-vendor: clean
-	go get -u github.com/Masterminds/glide \
-	&& glide install
+.PHONY: all
+all: build
 
+.PHONY: vendor
+vendor: clean
+	dep ensure
+
+.PHONY: build
 build: vendor
-	CGO_ENABLED=0 GOOS=${GOOS} go build -a -installsuffix cgo \
+	@echo "+ $@"
+	@CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -a -installsuffix cgo \
 		-ldflags "-s -w -X ${PROJECT}/version.RELEASE=${RELEASE} -X ${PROJECT}/version.COMMIT=${COMMIT} -X ${PROJECT}/version.REPO=${REPO_INFO}" \
 		-o ${APP}
 
+.PHONY: container
 container: build
-	docker build --pull -t $(PREFIX):$(RELEASE) .
+	@echo "+ $@"
+	@docker build --pull -t $(CONTAINER_IMAGE):$(RELEASE) .
 
+.PHONY: push
 push: container
-	docker push $(PREFIX):$(RELEASE)
+	@echo "+ $@"
+	@docker push $(CONTAINER_IMAGE):$(RELEASE)
 
+.PHONY: certs
+certs:
+ifeq ("$(wildcard $(CA_DIR)/ca-certificates.crt)","")
+	@echo "+ $@"
+	@docker run --name ${CONTAINER_NAME}-certs -d alpine:edge sh -c "apk --update upgrade && apk add ca-certificates && update-ca-certificates"
+	@docker wait ${CONTAINER_NAME}-certs
+	@docker cp ${CONTAINER_NAME}-certs:/etc/ssl/certs/ca-certificates.crt ${CA_DIR}
+	@docker rm -f ${CONTAINER_NAME}-certs
+endif
+
+.PHONY: container
 run: container
-	docker run --name ${CONTAINER_NAME} -p ${SERVICE_PORT}:${SERVICE_PORT} \
-		-e "SERVICE_PORT=${SERVICE_PORT}" \
-		-d $(PREFIX):$(RELEASE)
+	@echo "+ $@"
+	@docker run --name ${CONTAINER_NAME} -p ${GITHUBINT_LOCAL_PORT}:${GITHUBINT_LOCAL_PORT} \
+		-e "GITHUBINT_LOCAL_PORT=${GITHUBINT_LOCAL_PORT}" \
+		-d $(CONTAINER_IMAGE):$(RELEASE)
+	@sleep 1
+	@docker logs ${CONTAINER_NAME}
 
+.PHONY: deploy
 deploy: push
-	helm repo add ${USERSPACE} ${HELM_REPO} \
-	&& helm repo up \
-    && helm upgrade ${CONTAINER_NAME} ${USERSPACE}/${APP} --namespace ${NAMESPACE} --set image.tag=${RELEASE} -i --wait
+	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts \
+		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} \
+		--version=${RELEASE} -i --wait
 
+.PHONY: fmt
 fmt:
 	@echo "+ $@"
-	@go list -f '{{if len .TestGoFiles}}"gofmt -s -l {{.Dir}}"{{end}}' $(shell go list ${PROJECT}/... | grep -v vendor) | xargs -L 1 sh -c
+	@go fmt ./...
 
-lint:
+.PHONY: lint
+lint: bootstrap
 	@echo "+ $@"
-	@go list -f '{{if len .TestGoFiles}}"golint {{.Dir}}/..."{{end}}' $(shell go list ${PROJECT}/... | grep -v vendor) | xargs -L 1 sh -c
+	# @gometalinter --vendor ./...
 
+.PHONY: vet
 vet:
 	@echo "+ $@"
 	@go vet $(shell go list ${PROJECT}/... | grep -v vendor)
 
+.PHONY: test
 test: vendor fmt lint vet
 	@echo "+ $@"
 	@go test -v -race -tags "$(BUILDTAGS) cgo" $(shell go list ${PROJECT}/... | grep -v vendor)
 
+.PHONY: cover
 cover:
 	@echo "+ $@"
 	@go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' $(shell go list ${PROJECT}/... | grep -v vendor) | xargs -L 1 sh -c
 
+.PHONY: clean
 clean:
 	rm -f ${APP}
+
+HAS_DEP := $(shell command -v dep;)
+HAS_METALINTER := $(shell command -v gometalinter;)
+
+.PHONY: bootstrap
+bootstrap:
+ifndef HAS_DEP
+	go get -u github.com/golang/dep/cmd/dep
+endif
+ifndef HAS_METALINTER
+	go get -u -v -d github.com/alecthomas/gometalinter && \
+	go install -v github.com/alecthomas/gometalinter && \
+	gometalinter --install --update
+endif
