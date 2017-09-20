@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM scratch
 
 # Service env parameters
 ENV SERVICE_HOST 0.0.0.0
@@ -20,12 +20,11 @@ ENV GITHUB_CLIENT_SECRET 807ff71...
 ENV GITHUB_OAUTH_STATE just-a-very-secret-state
 ENV K8S_GUEST_TOKEN Gfn5Kf0e1Fisg4b9Fmv6FdS8b5dSo6JC
 
-RUN apk --no-cache add ca-certificates && update-ca-certificates
-
+COPY certs /etc/ssl/
 COPY static /static
 COPY templates /templates
-COPY k8s-community /
+COPY ui /
 
 EXPOSE $SERVICE_PORT
 
-CMD ["/k8s-community"]
+CMD ["/ui"]
