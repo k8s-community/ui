@@ -1,3 +1,2 @@
-vendor
-k8s-community
-glide.lock
+ui
+_vendor*

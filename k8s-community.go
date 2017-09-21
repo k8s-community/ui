@@ -9,12 +9,12 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
-	common_handlers "github.com/k8s-community/handlers"
-	"github.com/k8s-community/k8s-community/handlers"
-	"github.com/k8s-community/k8s-community/session/storage"
-	"github.com/k8s-community/k8s-community/version"
+	"github.com/k8s-community/ui/handlers"
+	"github.com/k8s-community/ui/session/storage"
+	"github.com/k8s-community/ui/version"
 	umClient "github.com/k8s-community/user-manager/client"
 	_ "github.com/lib/pq" // postgresql driver
+	"github.com/openprovider/handlers/info"
 	"github.com/takama/router"
 	"gopkg.in/reform.v1"
 	"gopkg.in/reform.v1/dialects/postgresql"
@@ -25,7 +25,7 @@ var log logrus.Logger
 func main() {
 	log := logrus.New()
 	log.Formatter = new(logrus.TextFormatter)
-	logger := log.WithFields(logrus.Fields{"service": "k8s-community"})
+	logger := log.WithFields(logrus.Fields{"service": "ui"})
 
 	var errors []error
 
@@ -134,9 +134,7 @@ func main() {
 		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))
 	})
 
-	r.GET("/info", func(c *router.Control) {
-		common_handlers.Info(c, version.RELEASE, version.REPO, version.COMMIT)
-	})
+	r.GET("/info", info.Handler(version.RELEASE, version.REPO, version.COMMIT))
 	r.GET("/healthz", func(c *router.Control) {
 		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))
 	})

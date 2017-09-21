@@ -1,0 +1,13 @@
+package: github.com/k8s-community/user-manager
+import:
+- package: github.com/takama/router
+  version: ^0.6.3
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/apis/meta/v1
+- package: k8s.io/client-go
+  version: ^3.0.0-beta.0
+  subpackages:
+  - kubernetes
+  - pkg/api/v1
+  - rest

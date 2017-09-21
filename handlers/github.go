@@ -7,7 +7,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	ghClient "github.com/google/go-github/github"
 	"github.com/icza/session"
-	"github.com/k8s-community/k8s-community/models"
+	"github.com/k8s-community/ui/models"
 	umClient "github.com/k8s-community/user-manager/client"
 	"github.com/takama/router"
 	"golang.org/x/oauth2"
