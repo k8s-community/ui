@@ -72,7 +72,7 @@ ingress:
     ## Secrets must be manually created in the namespace
     ##
     tls:
-    - secretName: tls-secret
+    - secretName: ui-tls-secret
       hosts:
       - ui.grahovac.me
 
