@@ -82,16 +82,16 @@ ingress:
   ##
   pathBased:
     hosts:
-    - services.grahovac.me
+    #- services.grahovac.me
 
     ## Ingress TLS configuration
     ## Secrets must be manually created in the namespace
     ## except of case when annotatoon `kubernetes.io/tls-acme: 'true'` is present
     ##
     tls:
-    - secretName: services-secret
-      hosts:
-      - services.grahovac.me
+    #- secretName: services-secret
+    #  hosts:
+    #  - services.grahovac.me
 
 service:
   ## App container name
