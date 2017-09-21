@@ -61,6 +61,8 @@ spec:
             secretKeyRef:
               name: k8s-guest
               key: token
+        - name: USERMAN_BASE_URL
+          value: {{ .Values.clients.userman.baseURL }}
         {{- range .Values.externalServices }}
         - name: {{ printf "%s_SERVICE_HOST" .name | upper }}
           value: {{ .host }}

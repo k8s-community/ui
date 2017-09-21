@@ -111,6 +111,10 @@ service:
   ##
   internalPort: 8080
 
+clients:
+  userman:
+    baseURL: https://services.grahovac.me/default/user-manager
+
 ## Resource requests and limits
 ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
 ##

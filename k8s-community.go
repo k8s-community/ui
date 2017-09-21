@@ -25,7 +25,7 @@ var log logrus.Logger
 func main() {
 	log := logrus.New()
 	log.Formatter = new(logrus.TextFormatter)
-	logger := log.WithFields(logrus.Fields{"service": "k8s-community"})
+	logger := log.WithFields(logrus.Fields{"service": "ui"})
 
 	var errors []error
 
