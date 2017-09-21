@@ -1,4 +1,4 @@
-FROM scratch
+FROM busybox
 
 # Service env parameters
 ENV SERVICE_HOST 0.0.0.0
