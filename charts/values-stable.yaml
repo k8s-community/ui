@@ -61,19 +61,20 @@ ingress:
   #   kubernetes.io/ingress.class: nginx
   #   kubernetes.io/tls-acme: 'true'
 
+  hostBased:
   ## Ingress hostnames
-  ## Must be provided if Ingress is enabled
-  ##
-  hosts:
-  - k8s.community
-
-  ## Ingress TLS configuration
-  ## Secrets must be manually created in the namespace
-  ##
-  tls:
-  - secretName: tls-secret
+    ## Must be provided if Ingress is enabled
+    ##
     hosts:
     - k8s.community
+
+    ## Ingress TLS configuration
+    ## Secrets must be manually created in the namespace
+    ##
+    tls:
+    - secretName: tls-secret
+      hosts:
+      - k8s.community
 
   ## Ingress path feature allow access to service through path
   ## example: https://hostname/namespace/servicename

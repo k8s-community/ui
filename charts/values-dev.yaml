@@ -61,19 +61,20 @@ ingress:
   #   kubernetes.io/ingress.class: nginx
   #   kubernetes.io/tls-acme: 'true'
 
-  ## Ingress hostnames
-  ## Must be provided if Ingress is enabled
-  ##
-  hosts:
-  - ui.grahovac.me
-
-  ## Ingress TLS configuration
-  ## Secrets must be manually created in the namespace
-  ##
-  tls:
-  - secretName: tls-secret
+  hostBased:
+    ## Ingress hostnames
+    ## Must be provided if Ingress is enabled
+    ##
     hosts:
     - ui.grahovac.me
+
+    ## Ingress TLS configuration
+    ## Secrets must be manually created in the namespace
+    ##
+    tls:
+    - secretName: tls-secret
+      hosts:
+      - ui.grahovac.me
 
   ## Ingress path feature allow access to service through path
   ## example: https://hostname/namespace/servicename
