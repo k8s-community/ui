@@ -4,5 +4,7 @@
     -   id: go-fmt
     -   id: go-vet
     -   id: go-lint
-    #-   id: validate-toml
-    #-   id: no-go-testing
+-   repo: git://github.com/pre-commit/pre-commit-hooks
+    sha: v0.9.1
+    hooks:
+    -   id: trailing-whitespace
