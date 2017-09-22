@@ -8,14 +8,14 @@ REGISTRY?=registry.k8s.community
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.2.3
+RELEASE?=0.2.4
 GOOS?=linux
 GOARCH?=amd64
 
 SERVICE_PORT?=8080
 
 NAMESPACE?=k8s-community
-INFRASTRUCTURE?=k8s-community
+INFRASTRUCTURE?=stable
 KUBE_CONTEXT?=${INFRASTRUCTURE}
 VALUES?=values-${INFRASTRUCTURE}
 
