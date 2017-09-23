@@ -9,14 +9,18 @@
         <p>Окружение в Kubernetes успешно создано.</p>
 
         <p>
-            Следующий шаг &mdash; настройка локальной среды. Пожалуйста, следуйте
+            <b>Шаг №2:</b> настройка локальной среды. Пожалуйста, следуйте
             <a href="https://github.com/k8s-community/k8s-workshop-ru/tree/develop/03-part-III-setup">
                 инструкции по подготовке окружения
             </a>.
         </p>
 
         <p>
-            Ваш токен: <code>{{ .GuestToken }}</code>.
+            Ваш токен для настроек в рамках шага 2: <code>{{ .GuestToken }}</code>.
+        </p>
+
+        <p>
+            <p>Шаг №3:</p> включаем интеграцию с GitHub <a href="https://github.com/apps/k8s">здессь</a>.
         </p>
 
     {{ else }}
@@ -31,6 +35,8 @@
 {{ else }}
 
 <div style="align-content: center">
+    <p>Для регистрации в мастер-классе пройдите по ссылке на GitHub:</p>
+
     <a href="{{ .GitHubSignInLink }}">
         <img src="./static/img/github-64px.png" />
     </a>
