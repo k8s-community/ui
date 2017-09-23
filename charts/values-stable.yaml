@@ -36,7 +36,7 @@ image:
   ##
   registry: registry.k8s.community/k8s-community
   name: ui
-  tag: 0.2.4
+  tag: 0.2.5
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
