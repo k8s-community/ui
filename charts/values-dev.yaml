@@ -34,7 +34,7 @@ workflow: prod
 image:
   ## Docker Registry/Hub image name and tag
   ##
-  registry: registry.grahovac.me/default
+  registry: registry.grahovac.me/k8s-community
   name: ui
   tag: 0.2.7
 
