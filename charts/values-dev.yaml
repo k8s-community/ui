@@ -34,9 +34,9 @@ workflow: prod
 image:
   ## Docker Registry/Hub image name and tag
   ##
-  registry: registry.grahovac.me/default
+  registry: registry.grahovac.me/k8s-community
   name: ui
-  tag: 0.2.7
+  tag: 0.2.8
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
@@ -113,7 +113,7 @@ service:
 
 clients:
   userman:
-    baseURL: https://services.grahovac.me/default/user-manager
+    baseURL: https://services.grahovac.me/k8s-community/user-manager
 
 ## Resource requests and limits
 ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
