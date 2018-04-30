@@ -36,7 +36,7 @@ image:
   ##
   registry: registry.k8s.community/k8s-community
   name: ui
-  tag: 0.2.9
+  tag: 0.2.11
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
@@ -62,10 +62,11 @@ ingress:
   #   kubernetes.io/tls-acme: 'true'
 
   hostBased:
-  ## Ingress hostnames
+    ## Ingress hostnames
     ## Must be provided if Ingress is enabled
     ##
     hosts:
+    - ui.k8s.community
     - k8s.community
 
     ## Ingress TLS configuration
@@ -74,6 +75,7 @@ ingress:
     tls:
     - secretName: ui-tls-secret
       hosts:
+      - ui.k8s.community
       - k8s.community
 
   ## Ingress path feature allow access to service through path
@@ -81,17 +83,17 @@ ingress:
   ## Must be provided if Ingress is enabled
   ##
   pathBased:
-    #hosts:
-    #- services.k8s.community
+    hosts:
+    - services.k8s.community
 
     ## Ingress TLS configuration
     ## Secrets must be manually created in the namespace
     ## except of case when annotatoon `kubernetes.io/tls-acme: 'true'` is present
     ##
     tls:
-    #- secretName: services-secret
-    #  hosts:
-    #  - services.k8s.community
+    - secretName: tls-secret
+      hosts:
+      - services.k8s.community
 
 service:
   ## App container name
