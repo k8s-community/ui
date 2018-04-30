@@ -74,6 +74,7 @@ ingress:
     tls:
     - secretName: ui-tls-secret
       hosts:
+      - ui.k8s.community
       - k8s.community
 
   ## Ingress path feature allow access to service through path
