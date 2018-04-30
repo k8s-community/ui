@@ -62,10 +62,11 @@ ingress:
   #   kubernetes.io/tls-acme: 'true'
 
   hostBased:
-  ## Ingress hostnames
+    ## Ingress hostnames
     ## Must be provided if Ingress is enabled
     ##
     hosts:
+    - ui.k8s.community
     - k8s.community
 
     ## Ingress TLS configuration
@@ -82,17 +83,17 @@ ingress:
   ## Must be provided if Ingress is enabled
   ##
   pathBased:
-    #hosts:
-    #- services.k8s.community
+    hosts:
+    - services.k8s.community
 
     ## Ingress TLS configuration
     ## Secrets must be manually created in the namespace
     ## except of case when annotatoon `kubernetes.io/tls-acme: 'true'` is present
     ##
     tls:
-    #- secretName: services-secret
-    #  hosts:
-    #  - services.k8s.community
+    - secretName: tls-secret
+      hosts:
+      - services.k8s.community
 
 service:
   ## App container name
