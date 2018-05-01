@@ -17,11 +17,12 @@ import (
 )
 
 func TestPullRequestsService_List(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		testFormValues(t, r, values{
 			"state":     "closed",
 			"head":      "h",
@@ -46,16 +47,20 @@ func TestPullRequestsService_List(t *testing.T) {
 }
 
 func TestPullRequestsService_List_invalidOwner(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
 	_, _, err := client.PullRequests.List(context.Background(), "%", "r", nil)
 	testURLParseError(t, err)
 }
 
 func TestPullRequestsService_Get(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		fmt.Fprint(w, `{"number":1}`)
 	})
 
@@ -70,9 +75,10 @@ func TestPullRequestsService_Get(t *testing.T) {
 	}
 }
 
-func TestPullRequestsService_GetRawDiff(t *testing.T) {
-	setup()
+func TestPullRequestsService_GetRaw_diff(t *testing.T) {
+	client, mux, _, teardown := setup()
 	defer teardown()
+
 	const rawStr = "@@diff content"
 
 	mux.HandleFunc("/repos/o/r/pulls/1", func(w http.ResponseWriter, r *http.Request) {
@@ -81,19 +87,20 @@ func TestPullRequestsService_GetRawDiff(t *testing.T) {
 		fmt.Fprint(w, rawStr)
 	})
 
-	ret, _, err := client.PullRequests.GetRaw(context.Background(), "o", "r", 1, RawOptions{Diff})
+	got, _, err := client.PullRequests.GetRaw(context.Background(), "o", "r", 1, RawOptions{Diff})
 	if err != nil {
 		t.Fatalf("PullRequests.GetRaw returned error: %v", err)
 	}
-
-	if ret != rawStr {
-		t.Errorf("PullRequests.GetRaw returned %s want %s", ret, rawStr)
+	want := rawStr
+	if got != want {
+		t.Errorf("PullRequests.GetRaw returned %s want %s", got, want)
 	}
 }
 
-func TestPullRequestsService_GetRawPatch(t *testing.T) {
-	setup()
+func TestPullRequestsService_GetRaw_patch(t *testing.T) {
+	client, mux, _, teardown := setup()
 	defer teardown()
+
 	const rawStr = "@@patch content"
 
 	mux.HandleFunc("/repos/o/r/pulls/1", func(w http.ResponseWriter, r *http.Request) {
@@ -102,18 +109,18 @@ func TestPullRequestsService_GetRawPatch(t *testing.T) {
 		fmt.Fprint(w, rawStr)
 	})
 
-	ret, _, err := client.PullRequests.GetRaw(context.Background(), "o", "r", 1, RawOptions{Patch})
+	got, _, err := client.PullRequests.GetRaw(context.Background(), "o", "r", 1, RawOptions{Patch})
 	if err != nil {
 		t.Fatalf("PullRequests.GetRaw returned error: %v", err)
 	}
-
-	if ret != rawStr {
-		t.Errorf("PullRequests.GetRaw returned %s want %s", ret, rawStr)
+	want := rawStr
+	if got != want {
+		t.Errorf("PullRequests.GetRaw returned %s want %s", got, want)
 	}
 }
 
-func TestPullRequestsService_GetRawInvalid(t *testing.T) {
-	setup()
+func TestPullRequestsService_GetRaw_invalid(t *testing.T) {
+	client, _, _, teardown := setup()
 	defer teardown()
 
 	_, _, err := client.PullRequests.GetRaw(context.Background(), "o", "r", 1, RawOptions{100})
@@ -126,7 +133,7 @@ func TestPullRequestsService_GetRawInvalid(t *testing.T) {
 }
 
 func TestPullRequestsService_Get_headAndBase(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1", func(w http.ResponseWriter, r *http.Request) {
@@ -143,11 +150,11 @@ func TestPullRequestsService_Get_headAndBase(t *testing.T) {
 		Number: Int(1),
 		Head: &PullRequestBranch{
 			Ref:  String("r2"),
-			Repo: &Repository{ID: Int(2)},
+			Repo: &Repository{ID: Int64(2)},
 		},
 		Base: &PullRequestBranch{
 			Ref:  String("r1"),
-			Repo: &Repository{ID: Int(1)},
+			Repo: &Repository{ID: Int64(1)},
 		},
 	}
 	if !reflect.DeepEqual(pull, want) {
@@ -156,7 +163,7 @@ func TestPullRequestsService_Get_headAndBase(t *testing.T) {
 }
 
 func TestPullRequestsService_Get_urlFields(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1", func(w http.ResponseWriter, r *http.Request) {
@@ -195,12 +202,15 @@ func TestPullRequestsService_Get_urlFields(t *testing.T) {
 }
 
 func TestPullRequestsService_Get_invalidOwner(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
 	_, _, err := client.PullRequests.Get(context.Background(), "%", "r", 1)
 	testURLParseError(t, err)
 }
 
 func TestPullRequestsService_Create(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &NewPullRequest{Title: String("t")}
@@ -210,6 +220,7 @@ func TestPullRequestsService_Create(t *testing.T) {
 		json.NewDecoder(r.Body).Decode(v)
 
 		testMethod(t, r, "POST")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		if !reflect.DeepEqual(v, input) {
 			t.Errorf("Request body = %+v, want %+v", v, input)
 		}
@@ -229,12 +240,15 @@ func TestPullRequestsService_Create(t *testing.T) {
 }
 
 func TestPullRequestsService_Create_invalidOwner(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
 	_, _, err := client.PullRequests.Create(context.Background(), "%", "r", nil)
 	testURLParseError(t, err)
 }
 
 func TestPullRequestsService_Edit(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	tests := []struct {
@@ -266,6 +280,7 @@ func TestPullRequestsService_Edit(t *testing.T) {
 		madeRequest := false
 		mux.HandleFunc(fmt.Sprintf("/repos/o/r/pulls/%v", i), func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "PATCH")
+			testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 			testBody(t, r, tt.wantUpdate+"\n")
 			io.WriteString(w, tt.sendResponse)
 			madeRequest = true
@@ -287,16 +302,20 @@ func TestPullRequestsService_Edit(t *testing.T) {
 }
 
 func TestPullRequestsService_Edit_invalidOwner(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
 	_, _, err := client.PullRequests.Edit(context.Background(), "%", "r", 1, &PullRequest{})
 	testURLParseError(t, err)
 }
 
 func TestPullRequestsService_ListCommits(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1/commits", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGitSigningPreview)
 		testFormValues(t, r, values{"page": "2"})
 		fmt.Fprint(w, `
 			[
@@ -349,7 +368,7 @@ func TestPullRequestsService_ListCommits(t *testing.T) {
 }
 
 func TestPullRequestsService_ListFiles(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1/files", func(w http.ResponseWriter, r *http.Request) {
@@ -411,7 +430,7 @@ func TestPullRequestsService_ListFiles(t *testing.T) {
 }
 
 func TestPullRequestsService_IsMerged(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1/merge", func(w http.ResponseWriter, r *http.Request) {
@@ -431,12 +450,11 @@ func TestPullRequestsService_IsMerged(t *testing.T) {
 }
 
 func TestPullRequestsService_Merge(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/pulls/1/merge", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		testHeader(t, r, "Accept", mediaTypeSquashPreview)
 		fmt.Fprint(w, `
 			{
 			  "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
@@ -463,7 +481,7 @@ func TestPullRequestsService_Merge(t *testing.T) {
 
 // Test that different merge options produce expected PUT requests. See issue https://github.com/google/go-github/issues/500.
 func TestPullRequestsService_Merge_options(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	tests := []struct {
@@ -500,7 +518,6 @@ func TestPullRequestsService_Merge_options(t *testing.T) {
 		madeRequest := false
 		mux.HandleFunc(fmt.Sprintf("/repos/o/r/pulls/%d/merge", i), func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "PUT")
-			testHeader(t, r, "Accept", mediaTypeSquashPreview)
 			testBody(t, r, test.wantBody+"\n")
 			madeRequest = true
 		})
