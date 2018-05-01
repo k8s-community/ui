@@ -86,7 +86,7 @@ fmt:
 .PHONY: lint
 lint: bootstrap
 	@echo "+ $@"
-	# @gometalinter --vendor ./...
+	#@gometalinter --vendor ./...
 
 .PHONY: vet
 vet:
@@ -94,7 +94,7 @@ vet:
 	@go vet $(shell go list ${PROJECT}/... | grep -v vendor)
 
 .PHONY: test
-test: vendor fmt lint vet
+test: fmt lint vet
 	@echo "+ $@"
 	@go test -v -race -tags "$(BUILDTAGS) cgo" $(shell go list ${PROJECT}/... | grep -v vendor)
 
