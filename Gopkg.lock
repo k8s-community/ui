@@ -65,19 +65,19 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "ae8bce0030810cf999bb2b9868ae5c7c58e6343b"
+  revision = "8b1d31080a7692e075c4681cb2458454a1fe0706"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp"]
-  revision = "5f9ae10d9af5b1c89ae6904293b14b064d4ada23"
+  revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
   packages = [".","github","internal"]
-  revision = "6881fee410a5daf86371371f9ad451b95e168b71"
+  revision = "cdc340f7c179dbbfa4afd43b7614e8fcadde4269"
 
 [[projects]]
   branch = "master"
