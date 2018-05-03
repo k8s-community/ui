@@ -1,0 +1,10 @@
+name: user-manager
+description: A Helm chart for user-manager service
+version: 0.2.2
+home: https://k8s.community/
+sources:
+  - https://github.com/k8s-community/user-manager
+maintainers:
+  - name: Kubernetes Community Authors
+    email: k8s.community@gmail.com
+engine: gotpl

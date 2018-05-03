@@ -36,3 +36,4 @@ For example, you can run service using `make run` (not for production, only for 
 Run migration:
 
     kubectl run -it --rm cockroach-client --image=cockroachdb/cockroach --restart=Never --command -- ./cockroach sql --host cockroachdb-public --insecure --database=k8s_community < 000.sql
+

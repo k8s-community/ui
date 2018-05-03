@@ -18,9 +18,9 @@ const (
 // main function
 func main() {
 	keys := []string{
-		"USERMAN_SERVICE_PORT",
+		"USERMAN_LOCAL_PORT",
 		"DOCKER_REGISTRY_SECRET_NAME", "TLS_SECRET_NAME",
-		"K8S_HOST", "K8S_TOKEN",
+		"K8S_BASE_URL", "K8S_TOKEN",
 	}
 	h := &handlers.Handler{
 		Infolog: log.New(os.Stdout, "[USERMAN:INFO]: ", log.LstdFlags),
@@ -42,10 +42,10 @@ func main() {
 
 	r.PUT(apiPrefix+"/sync-user", h.SyncUser)
 
-	h.Infolog.Printf("start listening port %s", h.Env["USERMAN_SERVICE_PORT"])
+	h.Infolog.Printf("start listening port %s", h.Env["USERMAN_LOCAL_PORT"])
 	h.Infolog.Printf("registered routes are: %+v", r.Routes())
 
-	go r.Listen(":" + h.Env["USERMAN_SERVICE_PORT"])
+	go r.Listen(":" + h.Env["USERMAN_LOCAL_PORT"])
 
 	// Set up channel on which to send signal notifications.
 	// We must use a buffered channel or risk missing the signal

@@ -1,4 +1,4 @@
 .idea
 user-manager
-vendor
-glide.lock
+_vendor*
+certs

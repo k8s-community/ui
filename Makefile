@@ -1,14 +1,12 @@
 all: push
 
-BUILDTAGS=
-
 APP?=ui
 PROJECT?=github.com/k8s-community/${APP}
 REGISTRY?=registry.k8s.community
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.2.11
+RELEASE?=0.3.0
 GOOS?=linux
 GOARCH?=amd64
 
@@ -28,95 +26,108 @@ ifndef COMMIT
 	COMMIT := git-$(shell git rev-parse --short HEAD)
 endif
 
+BUILDTAGS=
+
 .PHONY: all
 all: build
 
-.PHONY: vendor
-vendor: clean
-	dep ensure
-
 .PHONY: build
-build: vendor
+build: clean test certs
 	@echo "+ $@"
 	@CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -a -installsuffix cgo \
-		-ldflags "-s -w -X ${PROJECT}/version.RELEASE=${RELEASE} -X ${PROJECT}/version.COMMIT=${COMMIT} -X ${PROJECT}/version.REPO=${REPO_INFO}" \
-		-o ${APP}
-
-.PHONY: container
-container: certs build
-	@echo "+ $@"
-	@docker build --pull -t $(CONTAINER_IMAGE):$(RELEASE) .
-
-.PHONY: push
-push: container
-	@echo "+ $@"
-	@docker push $(CONTAINER_IMAGE):$(RELEASE)
+		-ldflags "-s -w -X ${PROJECT}/pkg/version.RELEASE=${RELEASE} -X ${PROJECT}/pkg/version.COMMIT=${COMMIT} -X ${PROJECT}/pkg/version.REPO=${REPO_INFO}" \
+		-o bin/${GOOS}-${GOARCH}/${APP} ${PROJECT}/cmd
+	docker build --pull -t $(CONTAINER_IMAGE):$(RELEASE) .
 
 .PHONY: certs
 certs:
 ifeq ("$(wildcard $(CA_DIR)/ca-certificates.crt)","")
 	@echo "+ $@"
-	@docker run --name ${CONTAINER_NAME}-certs -d alpine:latest sh -c "apk --update upgrade && apk add ca-certificates && update-ca-certificates"
+	@docker run --name ${CONTAINER_NAME}-certs -d alpine:edge sh -c "apk --update upgrade && apk add ca-certificates && update-ca-certificates"
 	@docker wait ${CONTAINER_NAME}-certs
 	@mkdir -p ${CA_DIR}
 	@docker cp ${CONTAINER_NAME}-certs:/etc/ssl/certs/ca-certificates.crt ${CA_DIR}
 	@docker rm -f ${CONTAINER_NAME}-certs
 endif
 
-.PHONY: container
-run: container
+.PHONY: push
+push: build
 	@echo "+ $@"
-	@docker run --name ${CONTAINER_NAME} -p ${GITHUBINT_LOCAL_PORT}:${GITHUBINT_LOCAL_PORT} \
-		-e "GITHUBINT_LOCAL_PORT=${GITHUBINT_LOCAL_PORT}" \
+	@docker push $(CONTAINER_IMAGE):$(RELEASE)
+
+.PHONY: run
+run: build
+	@echo "+ $@"
+	@docker run --name ${CONTAINER_NAME} -p ${K8SAPP_LOCAL_PORT}:${K8SAPP_LOCAL_PORT} \
+		-e "K8SAPP_LOCAL_HOST=${K8SAPP_LOCAL_HOST}" \
+		-e "K8SAPP_LOCAL_PORT=${K8SAPP_LOCAL_PORT}" \
+		-e "K8SAPP_LOG_LEVEL=${K8SAPP_LOG_LEVEL}" \
 		-d $(CONTAINER_IMAGE):$(RELEASE)
 	@sleep 1
 	@docker logs ${CONTAINER_NAME}
 
+HAS_RUNNED := $(shell docker ps | grep ${CONTAINER_NAME})
+HAS_EXITED := $(shell docker ps -a | grep ${CONTAINER_NAME})
+
+.PHONY: logs
+logs:
+	@echo "+ $@"
+	@docker logs ${CONTAINER_NAME}
+
+.PHONY: stop
+stop:
+ifdef HAS_RUNNED
+	@echo "+ $@"
+	@docker stop ${CONTAINER_NAME}
+endif
+
+.PHONY: start
+start: stop
+	@echo "+ $@"
+	@docker start ${CONTAINER_NAME}
+
+.PHONY: rm
+rm:
+ifdef HAS_EXITED
+	@echo "+ $@"
+	@docker rm ${CONTAINER_NAME}
+endif
+
 .PHONY: deploy
 deploy: push
-	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts \
-		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} \
-		--version=${RELEASE} -i --wait
+	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts --kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} --version=${RELEASE} -i --wait
 
 .PHONY: fmt
 fmt:
 	@echo "+ $@"
-	@go fmt ./...
+
 
 .PHONY: lint
 lint: bootstrap
 	@echo "+ $@"
-	# @gometalinter --vendor ./...
 
 .PHONY: vet
 vet:
 	@echo "+ $@"
-	@go vet $(shell go list ${PROJECT}/... | grep -v vendor)
+	@go vet ./...
 
 .PHONY: test
-test: vendor fmt lint vet
+test: clean fmt lint vet
 	@echo "+ $@"
-	@go test -v -race -tags "$(BUILDTAGS) cgo" $(shell go list ${PROJECT}/... | grep -v vendor)
-
-.PHONY: cover
-cover:
-	@echo "+ $@"
-	@go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' $(shell go list ${PROJECT}/... | grep -v vendor) | xargs -L 1 sh -c
+	@go test -v -race -tags "$(BUILDTAGS) cgo" ./...
 
 .PHONY: clean
-clean:
-	rm -f ${APP}
+clean: stop rm
+	@rm -f bin/${GOOS}-${GOARCH}/${APP}
 
 HAS_DEP := $(shell command -v dep;)
-HAS_METALINTER := $(shell command -v gometalinter;)
+HAS_LINT := $(shell command -v golint;)
 
 .PHONY: bootstrap
 bootstrap:
 ifndef HAS_DEP
 	go get -u github.com/golang/dep/cmd/dep
 endif
-ifndef HAS_METALINTER
-	go get -u -v -d github.com/alecthomas/gometalinter && \
-	go install -v github.com/alecthomas/gometalinter && \
-	gometalinter --install --update
+ifndef HAS_LINT
+	go get -u github.com/golang/lint/golint
 endif

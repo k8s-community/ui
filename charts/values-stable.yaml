@@ -36,7 +36,7 @@ image:
   ##
   registry: registry.k8s.community/k8s-community
   name: ui
-  tag: 0.2.11
+  tag: 0.3.0
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
@@ -76,7 +76,6 @@ ingress:
     - secretName: ui-tls-secret
       hosts:
       - ui.k8s.community
-      - k8s.community
 
   ## Ingress path feature allow access to service through path
   ## example: https://hostname/namespace/servicename
