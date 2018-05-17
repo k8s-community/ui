@@ -10,7 +10,11 @@ RELEASE?=0.3.0
 GOOS?=linux
 GOARCH?=amd64
 
-SERVICE_PORT?=8080
+K8SAPP_LOCAL_PORT?=8080
+K8SAPP_LOCAL_HOST?=0.0.0.0
+K8SAPP_LOG_LEVEL?=debug
+
+DB_CONNECTION_STRING?=
 
 NAMESPACE?=k8s-community
 INFRASTRUCTURE?=stable
@@ -32,7 +36,7 @@ BUILDTAGS=
 all: build
 
 .PHONY: build
-build: clean test certs
+build: clean certs
 	@echo "+ $@"
 	@CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -a -installsuffix cgo \
 		-ldflags "-s -w -X ${PROJECT}/pkg/version.RELEASE=${RELEASE} -X ${PROJECT}/pkg/version.COMMIT=${COMMIT} -X ${PROJECT}/pkg/version.REPO=${REPO_INFO}" \
@@ -59,6 +63,7 @@ push: build
 run: build
 	@echo "+ $@"
 	@docker run --name ${CONTAINER_NAME} -p ${K8SAPP_LOCAL_PORT}:${K8SAPP_LOCAL_PORT} \
+		-e "DB_CONNECTION_STRING=${DB_CONNECTION_STRING}" \
 		-e "K8SAPP_LOCAL_HOST=${K8SAPP_LOCAL_HOST}" \
 		-e "K8SAPP_LOCAL_PORT=${K8SAPP_LOCAL_PORT}" \
 		-e "K8SAPP_LOG_LEVEL=${K8SAPP_LOG_LEVEL}" \
@@ -71,8 +76,7 @@ HAS_EXITED := $(shell docker ps -a | grep ${CONTAINER_NAME})
 
 .PHONY: logs
 logs:
-	@echo "+ $@"
-	@docker logs ${CONTAINER_NAME}
+	docker logs ${CONTAINER_NAME}
 
 .PHONY: stop
 stop:

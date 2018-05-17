@@ -30,39 +30,49 @@ func main() {
 	var errors []error
 
 	// Database settings
-	dbHost, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_HOST")
-	if err != nil {
-		errors = append(errors, err)
-	}
+	var db *reform.DB
+	dbConnString := os.Getenv("DB_CONNECTION_STRING")
+	if len(dbConnString) > 0 {
+		var err error
+		db, err = startupDBWithConnectionString(dbConnString)
+		if err != nil {
+			log.Fatalf("Couldn't start up DB: %+v", err)
+		}
+	} else {
+		dbHost, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_HOST")
+		if err != nil {
+			errors = append(errors, err)
+		}
 
-	dbPort, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_PORT")
-	if err != nil {
-		errors = append(errors, err)
-	}
+		dbPort, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_PORT")
+		if err != nil {
+			errors = append(errors, err)
+		}
 
-	dbUser, err := getFromEnv("COCKROACHDB_USER")
-	if err != nil {
-		errors = append(errors, err)
-	}
+		dbUser, err := getFromEnv("COCKROACHDB_USER")
+		if err != nil {
+			errors = append(errors, err)
+		}
 
-	dbPass, err := getFromEnv("COCKROACHDB_PASSWORD")
-	if err != nil {
-		errors = append(errors, err)
-	}
+		dbPass, err := getFromEnv("COCKROACHDB_PASSWORD")
+		if err != nil {
+			errors = append(errors, err)
+		}
 
-	dbName, err := getFromEnv("COCKROACHDB_NAME")
-	if err != nil {
-		errors = append(errors, err)
-	}
+		dbName, err := getFromEnv("COCKROACHDB_NAME")
+		if err != nil {
+			errors = append(errors, err)
+		}
 
-	if len(errors) > 0 {
-		logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
-	}
+		if len(errors) > 0 {
+			logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
+		}
 
-	dbHost = "10.254.49.113"
-	db, err := startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
-	if err != nil {
-		log.Fatalf("Couldn't start up DB: %+v", err)
+		dbHost = "10.254.49.113"
+		db, err = startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
+		if err != nil {
+			log.Fatalf("Couldn't start up DB: %+v", err)
+		}
 	}
 
 	// Session manager settings: temporary solution
@@ -159,6 +169,26 @@ func startupDB(host, port, user, password, name string) (*reform.DB, error) {
 	dataSource := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, name,
 	)
+
+	conn, err := sql.Open("postgres", dataSource)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = conn.Ping(); err != nil {
+		return nil, err
+	}
+
+	db := reform.NewDB(conn, postgresql.Dialect, reform.NewPrintfLogger(log.Printf))
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func startupDBWithConnectionString(connectionString string) (*reform.DB, error) {
+	dataSource := fmt.Sprintf(connectionString)
 
 	conn, err := sql.Open("postgres", dataSource)
 	if err != nil {

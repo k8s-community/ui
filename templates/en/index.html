@@ -1,0 +1,46 @@
+{{ define "content" }}
+
+{{ if .Login }}
+
+<div>
+    <p>You are authorized as <b>{{ .Login }}</b>.</p>
+
+    {{ if .Activated }}
+        <p>Your Kubernetes environment was created.</p>
+
+        <p>
+            <b>Step 2:</b> let's prepare the local environment. Please, follow
+            <a href="https://github.com/k8s-community/gophercon-eu/tree/master/k8s-local-env">
+                the instruction.
+            </a>.
+            Your personal token is <code>{{ .GuestToken }}</code>.
+        </p>
+
+        <p>
+            <b>Step 3:</b> setup GitHub ingeration <a href="https://github.com/apps/k8s">here</a>.
+        </p>
+
+    {{ else }}
+        <p>
+            Your Kubernetes environment is preparing.
+            Please, refresh this page to check its status.
+        </p>
+    {{ end }}
+
+</div>
+
+{{ else }}
+
+<div style="align-content: center">
+    <p>To join the workshop please sign in with your account:</p>
+
+    <a href="{{ .GitHubSignInLink }}">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+            Sign in with GitHub
+        </button>
+    </a>
+</div>
+
+{{ end }}
+
+{{ end }}
