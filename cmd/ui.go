@@ -70,7 +70,7 @@ func main() {
 
 		db, err = startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
 		if err != nil {
-			log.Fatalf("Couldn't start up DB: %+v", err)
+			log.Fatalf("Couldn't start up DB for %v:%v: %+v", dbHost, dbPort, err)
 		}
 	}
 
