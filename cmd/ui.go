@@ -29,6 +29,8 @@ func main() {
 
 	var errors []error
 
+	log.Info("%+v", os.Environ())
+
 	// Database settings
 	var db *reform.DB
 	dbConnString := os.Getenv("DB_CONNECTION_STRING")
