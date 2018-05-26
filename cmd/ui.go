@@ -29,49 +29,41 @@ func main() {
 
 	var errors []error
 
+	log.Info("%+v", os.Environ())
+
 	// Database settings
-	var db *reform.DB
-	dbConnString := os.Getenv("DB_CONNECTION_STRING")
-	if len(dbConnString) > 0 {
-		var err error
-		db, err = startupDBWithConnectionString(dbConnString)
-		if err != nil {
-			log.Fatalf("Couldn't start up DB: %+v", err)
-		}
-	} else {
-		dbHost, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_HOST")
-		if err != nil {
-			errors = append(errors, err)
-		}
+	dbHost, err := getFromEnv("UIDB_SERVICE_HOST")
+	if err != nil {
+		errors = append(errors, err)
+	}
 
-		dbPort, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_PORT")
-		if err != nil {
-			errors = append(errors, err)
-		}
+	dbPort, err := getFromEnv("UIDB_SERVICE_PORT")
+	if err != nil {
+		errors = append(errors, err)
+	}
 
-		dbUser, err := getFromEnv("COCKROACHDB_USER")
-		if err != nil {
-			errors = append(errors, err)
-		}
+	dbUser, err := getFromEnv("COCKROACHDB_USER")
+	if err != nil {
+		errors = append(errors, err)
+	}
 
-		dbPass, err := getFromEnv("COCKROACHDB_PASSWORD")
-		if err != nil {
-			errors = append(errors, err)
-		}
+	dbPass, err := getFromEnv("COCKROACHDB_PASSWORD")
+	if err != nil {
+		errors = append(errors, err)
+	}
 
-		dbName, err := getFromEnv("COCKROACHDB_NAME")
-		if err != nil {
-			errors = append(errors, err)
-		}
+	dbName, err := getFromEnv("COCKROACHDB_NAME")
+	if err != nil {
+		errors = append(errors, err)
+	}
 
-		if len(errors) > 0 {
-			logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
-		}
+	if len(errors) > 0 {
+		logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
+	}
 
-		db, err = startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
-		if err != nil {
-			log.Fatalf("Couldn't start up DB: %+v", err)
-		}
+	db, err := startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
+	if err != nil {
+		log.Fatalf("Couldn't start up DB for %v:%v: %+v", dbHost, dbPort, err)
 	}
 
 	// Session manager settings: temporary solution
