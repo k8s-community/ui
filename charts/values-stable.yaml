@@ -59,6 +59,7 @@ ingress:
   ##
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
   #   kubernetes.io/tls-acme: 'true'
 
   hostBased:
@@ -67,7 +68,6 @@ ingress:
     ##
     hosts:
     - ui.k8s.community
-    - k8s.community
 
     ## Ingress TLS configuration
     ## Secrets must be manually created in the namespace
