@@ -9,15 +9,16 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
-	"github.com/k8s-community/ui/handlers"
-	"github.com/k8s-community/ui/session/storage"
-	"github.com/k8s-community/ui/version"
 	umClient "github.com/k8s-community/user-manager/client"
 	_ "github.com/lib/pq" // postgresql driver
 	"github.com/openprovider/handlers/info"
 	"github.com/takama/router"
 	"gopkg.in/reform.v1"
 	"gopkg.in/reform.v1/dialects/postgresql"
+
+	"github.com/k8s-community/ui/handlers"
+	"github.com/k8s-community/ui/session/storage"
+	"github.com/k8s-community/ui/version"
 )
 
 var log logrus.Logger
