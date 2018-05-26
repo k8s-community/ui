@@ -10,8 +10,12 @@ import (
 
 // Home handles homepage request
 func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
+	lang := "en"
 	return func(c *router.Control) {
-		t, err := template.ParseFiles("templates/layout.html", "templates/index.html")
+		t, err := template.ParseFiles(
+			"templates/"+lang+"/layout.html",
+			"templates/"+lang+"/index.html",
+		)
 
 		if err != nil {
 			log.Fatalf("Couldn't parse template files: %+v", err)

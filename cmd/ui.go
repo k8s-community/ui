@@ -29,13 +29,15 @@ func main() {
 
 	var errors []error
 
+	log.Info("%+v", os.Environ())
+
 	// Database settings
-	dbHost, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_HOST")
+	dbHost, err := getFromEnv("UIDB_SERVICE_HOST")
 	if err != nil {
 		errors = append(errors, err)
 	}
 
-	dbPort, err := getFromEnv("COCKROACHDB_PUBLIC_SERVICE_PORT")
+	dbPort, err := getFromEnv("UIDB_SERVICE_PORT")
 	if err != nil {
 		errors = append(errors, err)
 	}
@@ -59,10 +61,9 @@ func main() {
 		logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
 	}
 
-	dbHost = "10.254.49.113"
 	db, err := startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
 	if err != nil {
-		log.Fatalf("Couldn't start up DB: %+v", err)
+		log.Fatalf("Couldn't start up DB for %v:%v: %+v", dbHost, dbPort, err)
 	}
 
 	// Session manager settings: temporary solution
@@ -159,6 +160,26 @@ func startupDB(host, port, user, password, name string) (*reform.DB, error) {
 	dataSource := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, name,
 	)
+
+	conn, err := sql.Open("postgres", dataSource)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = conn.Ping(); err != nil {
+		return nil, err
+	}
+
+	db := reform.NewDB(conn, postgresql.Dialect, reform.NewPrintfLogger(log.Printf))
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func startupDBWithConnectionString(connectionString string) (*reform.DB, error) {
+	dataSource := fmt.Sprintf(connectionString)
 
 	conn, err := sql.Open("postgres", dataSource)
 	if err != nil {
