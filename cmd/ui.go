@@ -32,27 +32,22 @@ func main() {
 	log.Info("%+v", os.Environ())
 
 	// Database settings
-	dbHost, err := getFromEnv("UIDB_SERVICE_HOST")
+	namespace, err := getFromEnv("NAMESPACE")
 	if err != nil {
 		errors = append(errors, err)
 	}
 
-	dbPort, err := getFromEnv("UIDB_SERVICE_PORT")
+	dbUser, err := getFromEnv("UIDB_USER")
 	if err != nil {
 		errors = append(errors, err)
 	}
 
-	dbUser, err := getFromEnv("COCKROACHDB_USER")
+	dbPass, err := getFromEnv("UIDB_PASSWORD")
 	if err != nil {
 		errors = append(errors, err)
 	}
 
-	dbPass, err := getFromEnv("COCKROACHDB_PASSWORD")
-	if err != nil {
-		errors = append(errors, err)
-	}
-
-	dbName, err := getFromEnv("COCKROACHDB_NAME")
+	dbName, err := getFromEnv("UIDB_NAME")
 	if err != nil {
 		errors = append(errors, err)
 	}
@@ -60,6 +55,9 @@ func main() {
 	if len(errors) > 0 {
 		logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
 	}
+
+	dbHost := fmt.Sprintf("%s.%s", "uidb", namespace)
+	dbPort := "5432"
 
 	db, err := startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
 	if err != nil {
