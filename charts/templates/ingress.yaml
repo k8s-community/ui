@@ -8,6 +8,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
+    ingress.kubernetes.io/rewrite-target: {{ .Values.ingress.prefix }}
   {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
   {{- end }}
