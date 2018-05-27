@@ -30,8 +30,6 @@ func main() {
 
 	var errors []error
 
-	log.Info("%+v", os.Environ())
-
 	// Database settings
 	namespace, err := getFromEnv("NAMESPACE")
 	if err != nil {
