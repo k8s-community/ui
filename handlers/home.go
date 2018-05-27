@@ -47,7 +47,7 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 // Handle undefined routes
 func NotFound(log logrus.FieldLogger) router.Handle {
 	return func(c *router.Control) {
-		log.Warning("couldn't find path: %s", c.Request.RequestURI)
+		log.Warningf("couldn't find path: %s", c.Request.RequestURI)
 		http.NotFound(c.Writer, c.Request)
 	}
 }
