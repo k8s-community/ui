@@ -36,7 +36,7 @@ image:
   ##
   registry: docker.io/k8sc
   name: k8s-community-ui
-  tag: 0.4.3
+  tag: 0.4.4
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
@@ -51,14 +51,11 @@ ingress:
   ##
   enabled: true
 
-  ## Prefix for API (Example: /api/v1/)
-  ##
-  prefix: /
-
   ## Ingress annotations
   ##
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
   #   kubernetes.io/tls-acme: 'true'
 
   hostBased:

@@ -6,7 +6,7 @@ REGISTRY?=docker.io/k8sc
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.4.3
+RELEASE?=0.4.4
 GOOS?=linux
 GOARCH?=amd64
 
@@ -39,7 +39,7 @@ all: build
 build: clean certs
 	@echo "+ $@"
 	@CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -a -installsuffix cgo \
-		-ldflags "-s -w -X ${PROJECT}/pkg/version.RELEASE=${RELEASE} -X ${PROJECT}/pkg/version.COMMIT=${COMMIT} -X ${PROJECT}/pkg/version.REPO=${REPO_INFO}" \
+		-ldflags "-s -w -X ${PROJECT}/version.RELEASE=${RELEASE} -X ${PROJECT}/version.COMMIT=${COMMIT} -X ${PROJECT}/version.REPO=${REPO_INFO}" \
 		-o bin/${GOOS}-${GOARCH}/${APP} ${PROJECT}/cmd
 	docker build --pull -t $(CONTAINER_IMAGE):$(RELEASE) .
 
