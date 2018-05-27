@@ -138,6 +138,8 @@ func main() {
 		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))
 	})
 
+	r.NotFound = handlers.NotFound(logger)
+
 	hostPort := fmt.Sprintf("%s:%s", serviceHost, servicePort)
 	logger.Infof("Ready to listen %s\nRoutes: %+v", hostPort, r.Routes())
 	r.Listen(hostPort)

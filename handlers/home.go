@@ -3,6 +3,8 @@ package handlers
 import (
 	"html/template"
 
+	"net/http"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
 	"github.com/takama/router"
@@ -39,5 +41,13 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 		}
 
 		t.ExecuteTemplate(c.Writer, "layout", data)
+	}
+}
+
+// Handle undefined routes
+func NotFound(log logrus.FieldLogger) router.Handle {
+	return func(c *router.Control) {
+		log.Warning("couldn't find path: %s", c.Request.RequestURI)
+		http.NotFound(c.Writer, c.Request)
 	}
 }
