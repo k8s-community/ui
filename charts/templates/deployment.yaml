@@ -31,6 +31,10 @@ spec:
         image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         - name: GITHUB_CLIENT_ID
           valueFrom:
             secretKeyRef:
@@ -46,12 +50,12 @@ spec:
             secretKeyRef:
               name: github-oauth
               key: state
-        - name: COCKROACHDB_USER
+        - name: UIDB_USER
           valueFrom:
             secretKeyRef:
               name: k8s-community-db
               key: user
-        - name: COCKROACHDB_PASSWORD
+        - name: UIDB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: k8s-community-db

@@ -2,11 +2,11 @@ all: push
 
 APP?=ui
 PROJECT?=github.com/k8s-community/${APP}
-REGISTRY?=docker.io/k8scomm
+REGISTRY?=docker.io/k8sc
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.4.1
+RELEASE?=0.4.2
 GOOS?=linux
 GOARCH?=amd64
 
@@ -21,8 +21,8 @@ INFRASTRUCTURE?=stable
 KUBE_CONTEXT?=${INFRASTRUCTURE}
 VALUES?=values-${INFRASTRUCTURE}
 
-CONTAINER_IMAGE?=${REGISTRY}/${APP}-${NAMESPACE}
-CONTAINER_NAME?=${APP}-${NAMESPACE}
+CONTAINER_NAME?=${NAMESPACE}-${APP}
+CONTAINER_IMAGE?=${REGISTRY}/${CONTAINER_NAME}
 
 REPO_INFO=$(shell git config --get remote.origin.url)
 
