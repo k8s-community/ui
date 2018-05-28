@@ -126,6 +126,7 @@ func main() {
 	r.GET("/", handlers.Home(logger, k8sGuestToken))
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
+	r.GET("/signout", handlers.Signout())
 
 	r.GET("/builds/:id", func(c *router.Control) {
 		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))

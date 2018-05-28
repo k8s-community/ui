@@ -25,11 +25,13 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 
 		data := struct {
 			GitHubSignInLink string // link to sign in to GitHub
+			SignOutLink      string // link to sign out (delete session)
 			Login            string // user's login
 			Activated        bool   // is user activated in k8s
 			GuestToken       string // a token to reach Kubernetes
 		}{
 			GitHubSignInLink: "/oauth/github",
+			SignOutLink:      "/signout",
 			GuestToken:       k8sToken,
 		}
 
@@ -41,6 +43,13 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 		}
 
 		t.ExecuteTemplate(c.Writer, "layout", data)
+	}
+}
+
+func Signout() router.Handle {
+	return func(c *router.Control) {
+		session.Remove(session.Get(c.Request), c.Writer)
+		http.Redirect(c.Writer, c.Request, "/", http.StatusFound)
 	}
 }
 

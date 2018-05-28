@@ -3,6 +3,7 @@
 {{ if .Login }}
 
 <div>
+
     <p>You are authorized as <b>{{ .Login }}</b>.</p>
 
     {{ if .Activated }}
@@ -26,6 +27,12 @@
             Please, refresh this page to check its status.
         </p>
     {{ end }}
+
+    <a href="{{ .SignOutLink }}">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+            Sign out
+        </button>
+    </a>
 
 </div>
 
