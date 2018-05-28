@@ -26,6 +26,7 @@ var log logrus.Logger
 func main() {
 	log := logrus.New()
 	log.Formatter = new(logrus.TextFormatter)
+	log.Level = logrus.DebugLevel
 	logger := log.WithFields(logrus.Fields{"service": "ui"})
 
 	var errors []error
@@ -83,10 +84,7 @@ func main() {
 		errors = append(errors, err)
 	}
 
-	usermanBaseURL, err := getFromEnv("USERMAN_BASE_URL")
-	if err != nil {
-		errors = append(errors, err)
-	}
+	usermanBaseURL := fmt.Sprintf("http://user-manager.%s:80", namespace)
 
 	githubClientID, err := getFromEnv("GITHUB_CLIENT_ID")
 	if err != nil {
