@@ -6,7 +6,7 @@ REGISTRY?=gcr.io/containers-206912
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.5.3
+RELEASE?=0.5.4
 GOOS?=linux
 GOARCH?=amd64
 
