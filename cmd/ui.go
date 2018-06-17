@@ -9,6 +9,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
+	ghint "github.com/k8s-community/github-integration/client"
 	umClient "github.com/k8s-community/user-manager/client"
 	_ "github.com/lib/pq" // postgresql driver
 	"github.com/openprovider/handlers/info"
@@ -85,6 +86,7 @@ func main() {
 	}
 
 	usermanBaseURL := fmt.Sprintf("http://user-manager.%s:80", namespace)
+	ghintBaseURL := fmt.Sprintf("http://github-integration.%s:80", namespace)
 
 	githubClientID, err := getFromEnv("GITHUB_CLIENT_ID")
 	if err != nil {
@@ -117,6 +119,12 @@ func main() {
 		logger.Fatalf("Couldn't get an instance of user-manager's service client: %+v", err)
 	}
 
+	// Init github-integration client to get info about the builds
+	ghintClient, err := ghint.NewClient(nil, ghintBaseURL)
+	if err != nil {
+		logger.Fatalf("Couldn't get an instance of github-integration's service client: %+v", err)
+	}
+
 	githubHandler := handlers.NewGitHubOAuth(logger, usermanClient, oauthState, githubClientID, githubClientSecret)
 
 	// TODO: add graceful shutdown
@@ -127,6 +135,7 @@ func main() {
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 	r.GET("/signout", handlers.Signout())
+	r.GET("/builds/:uuid", handlers.BuildHistory(ghintClient))
 
 	r.GET("/builds/:id", func(c *router.Control) {
 		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))
