@@ -1,6 +1,6 @@
 name: user-manager
 description: A Helm chart for user-manager service
-version: 0.2.2
+version: 0.3.0
 home: https://k8s.community/
 sources:
   - https://github.com/k8s-community/user-manager

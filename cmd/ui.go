@@ -135,7 +135,7 @@ func main() {
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 	r.GET("/signout", handlers.Signout())
-	r.GET("/builds/:uuid", handlers.BuildHistory(ghintClient))
+	r.GET("/builds/:uuid", handlers.BuildHistory(ghintClient, "en"))
 
 	r.GET("/builds/:id", func(c *router.Control) {
 		c.Code(http.StatusOK).Body(http.StatusText(http.StatusOK))

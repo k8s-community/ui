@@ -1,0 +1,85 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "name" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.service.name }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  minReadySeconds: {{ .Values.minReadySeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.maxUnavailable }}
+      maxSurge: {{ .Values.maxSurge }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      {{- if .Values.image.pullSecretName }}
+      imagePullSecrets:
+      - name: {{ .Values.image.pullSecretName }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: GITHUBINT_INTEGRATION_ID
+          valueFrom:
+            secretKeyRef:
+              name: github-integration
+              key: integration-id
+        - name: GITHUBINT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-integration
+              key: integration-token
+        - name: GITHUBINT_PRIV_KEY
+          valueFrom:
+            secretKeyRef:
+              name: github-integration
+              key: integration-private-key
+        - name: GITHUBDB_USER
+          valueFrom:
+            secretKeyRef:
+              name: github-int-db
+              key: user
+        - name: GITHUBDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: github-int-db
+              key: password
+        - name: CICD_BASE_URL
+          value: {{ .Values.clients.cicd.baseURL }}
+        - name: USERMAN_BASE_URL
+          value: {{ .Values.clients.userman.baseURL }}
+        {{- range .Values.externalServices }}
+        - name: {{ printf "%s_SERVICE_HOST" .name | upper }}
+          value: {{ .host }}
+        - name: {{ printf "%s_SERVICE_PORT" .name | upper }}
+          value: "{{ .port }}"
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.service.internalPort }}
+        readinessProbe:
+          httpGet:
+            path: /info
+            port: {{ .Values.service.internalPort }}
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+      terminationGracePeriodSeconds: {{ .Values.gracePeriod }}

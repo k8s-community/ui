@@ -1,0 +1,125 @@
+## Default values for myapp.
+## This is a YAML-formatted file.
+## Declare variables to be passed into your templates.
+
+## Count of instances
+##
+replicaCount: 2
+
+## Count of revisions saved in release history
+##
+revisionHistoryLimit: 5
+
+## Time of accepting requests to the service ( seconds )
+##
+minReadySeconds: 10
+
+## Value which provide max unavailable state ( percents )
+##
+maxUnavailable: 50%
+
+## Max count of surge replicas
+##
+maxSurge: 1
+
+## Termination grace period
+## It's value of period in seconds between SIGTERM and SIGKILL signals
+##
+gracePeriod: 30
+
+## Base namespace for working services
+##
+workflow: prod
+
+image:
+  ## Docker Registry/Hub image name and tag
+  ##
+  registry: docker.io/k8sc
+  name: k8s-community-github-integration
+  tag: 0.8.1
+
+  ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
+  ##
+  pullSecretName: registry-pull-secret
+
+  ## Docker Registry/Hub image pull policy
+  ##
+  pullPolicy: Always
+
+ingress:
+  ## If true, Ingress will be created
+  ##
+  enabled: true
+
+  ## Ingress annotations
+  ##
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## Ingress hostnames
+  ## Must be provided if Ingress is enabled
+  ##
+  hosts:
+  #- ghint.k8s.community
+
+  ## Ingress TLS configuration
+  ## Secrets must be manually created in the namespace
+  ##
+  tls:
+  #- secretName: tls-secret
+  #  hosts:
+  #  - ghint.k8s.community
+
+  ## Ingress path feature allow access to service through path
+  ## example: https://hostname/namespace/servicename
+  ## Must be provided if Ingress is enabled
+  ##
+  pathBased:
+    hosts:
+    - services.k8s.community
+
+    ## Ingress TLS configuration
+    ## Secrets must be manually created in the namespace
+    ## except of case when annotatoon `kubernetes.io/tls-acme: 'true'` is present
+    ##
+    tls:
+    - secretName: tls-secret
+      hosts:
+      - services.k8s.community
+
+service:
+  ## App container name
+  ##
+  name: github-integration
+
+  ## Service Type
+  ## For minikube, set this to NodePort, elsewhere use ClusterIP
+  ##
+  type: ClusterIP
+
+  ## App service port
+  ##
+  externalPort: 80
+
+  ## Pod exposed port
+  ##
+  internalPort: 8080
+
+clients:
+  userman:
+    baseURL: https://services.k8s.community/k8s-community/user-manager
+  cicd:
+    baseURL: http://build.k8s.community:8080
+
+## Resource requests and limits
+## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources:
+  limits:
+    cpu: 30m
+    memory: 48Mi
+  requests:
+    cpu: 30m
+    memory: 48Mi

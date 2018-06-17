@@ -2,3 +2,4 @@
 user-manager
 _vendor*
 certs
+bin/*

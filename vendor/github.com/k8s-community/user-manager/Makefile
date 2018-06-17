@@ -5,23 +5,23 @@ BUILDTAGS=
 
 APP?=user-manager
 PROJECT?=github.com/k8s-community/${APP}
-REGISTRY?=registry.k8s.community
+REGISTRY?=docker.io/k8sc
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.2.2
+RELEASE?=0.3.0
 GOOS?=linux
 GOARCH?=amd64
 
 USERMAN_LOCAL_PORT?=8080
 
 NAMESPACE?=k8s-community
-INFRASTRUCTURE?=k8s-community
+INFRASTRUCTURE?=stable
 KUBE_CONTEXT?=${INFRASTRUCTURE}
 VALUES?=values-${INFRASTRUCTURE}
 
-CONTAINER_IMAGE?=${REGISTRY}/${NAMESPACE}/${APP}
-CONTAINER_NAME?=${APP}-${NAMESPACE}
+CONTAINER_NAME?=${NAMESPACE}-${APP}
+CONTAINER_IMAGE?=${REGISTRY}/${CONTAINER_NAME}
 
 REPO_INFO=$(shell git config --get remote.origin.url)
 
@@ -42,7 +42,7 @@ build: vendor
 	@echo "+ $@"
 	@CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -a -installsuffix cgo \
 		-ldflags "-s -w -X ${PROJECT}/version.RELEASE=${RELEASE} -X ${PROJECT}/version.COMMIT=${COMMIT} -X ${PROJECT}/version.REPO=${REPO_INFO}" \
-		-o ${APP}
+		-o bin/${GOOS}-${GOARCH}/${APP}
 
 .PHONY: container
 container: build certs
@@ -58,7 +58,7 @@ push: container
 certs:
 ifeq ("$(wildcard $(CA_DIR)/ca-certificates.crt)","")
 	@echo "+ $@"
-	@docker run --name ${CONTAINER_NAME}-certs -d alpine:edge sh -c "apk --update upgrade && apk add ca-certificates && update-ca-certificates"
+	@docker run --name ${CONTAINER_NAME}-certs -d alpine:latest sh -c "apk --update upgrade && apk add ca-certificates && update-ca-certificates"
 	@docker wait ${CONTAINER_NAME}-certs
 	@docker cp ${CONTAINER_NAME}-certs:/etc/ssl/certs/ca-certificates.crt ${CA_DIR}
 	@docker rm -f ${CONTAINER_NAME}-certs
