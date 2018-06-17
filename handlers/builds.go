@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/icza/session"
 	ghint "github.com/k8s-community/github-integration/client"
@@ -31,6 +32,8 @@ func BuildHistory(client *ghint.Client, lang string) router.Handle {
 		if err != nil {
 			// todo
 		}
+
+		strings.Replace(build.Log, "\n", "<br>", -1)
 
 		t.ExecuteTemplate(c.Writer, "layout", build)
 	}
