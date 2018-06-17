@@ -34,13 +34,13 @@ workflow: prod
 image:
   ## Docker Registry/Hub image name and tag
   ##
-  registry: docker.io/k8sc
+  registry: gcr.io/containers-206912
   name: k8s-community-ui
-  tag: 0.4.6
+  tag: 0.4.8
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
-  pullSecretName: registry-pull-secret
+  #pullSecretName: registry-pull-secret
 
   ## Docker Registry/Hub image pull policy
   ##
