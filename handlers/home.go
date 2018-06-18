@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"net/http"
 
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
 	"github.com/k8s-community/ui/models"
@@ -25,13 +27,13 @@ func Home(db *reform.DB, log logrus.FieldLogger, k8sToken string) router.Handle 
 		}
 
 		data := struct {
-			GitHubSignInLink string // link to sign in to GitHub
-			SignOutLink      string // link to sign out (delete session)
-			Login            string // user's login
-			Activated        bool   // is user activated in k8s
-			GuestToken       string // a token to reach Kubernetes
-			Token            string // personal token
-			CA               string // personal cert
+			GitHubSignInLink string        // link to sign in to GitHub
+			SignOutLink      string        // link to sign out (delete session)
+			Login            string        // user's login
+			Activated        bool          // is user activated in k8s
+			GuestToken       string        // a token to reach Kubernetes
+			Token            string        // personal token
+			CA               template.HTML // personal cert
 		}{
 			GitHubSignInLink: "/oauth/github",
 			SignOutLink:      "/signout",
@@ -47,7 +49,7 @@ func Home(db *reform.DB, log logrus.FieldLogger, k8sToken string) router.Handle 
 
 		token, cert := GetToken(db, log, data.Login)
 		data.Token = token
-		data.CA = cert
+		data.CA = template.HTML(cert)
 
 		t.ExecuteTemplate(c.Writer, "layout", data)
 	}
@@ -86,6 +88,7 @@ func GetToken(db *reform.DB, logger logrus.FieldLogger, username string) (token 
 	}
 	if user.Cert != nil {
 		cert = *user.Cert
+		cert = strings.Replace(cert, "\n", "<br>", -1)
 	}
 
 	return token, cert
