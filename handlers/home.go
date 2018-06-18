@@ -71,11 +71,13 @@ func NotFound(log logrus.FieldLogger) router.Handle {
 func GetToken(db *reform.DB, logger logrus.FieldLogger, username string) (token string, cert string) {
 	st, err := db.FindOneFrom(models.UserTable, "name", username)
 	if err == reform.ErrNoRows {
-		logger.Infof("Show user token and cert: attention! Session is not found")
+		logger.Infof("Show user token and cert: attention! user '%s' not found", username)
+		return
 	}
 
 	if err != nil {
-		logger.Errorf("Show user token and cert: attention! Couldn't get session from DB: %+v", err)
+		logger.Errorf("Show user token and cert: attention! Couldn't get user from DB: %+v", err)
+		return
 	}
 
 	user := st.(*models.User)
