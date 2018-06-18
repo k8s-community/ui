@@ -41,8 +41,8 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 		sessionData := session.Get(c.Request)
 		if sessionData != nil {
 			data.Login = sessionData.CAttr("Login").(string)
-			data.Token = sessionData.CAttr("Token").(string)
-			data.CA = sessionData.CAttr("CA").(string)
+			//data.Token = sessionData.CAttr("Token").(string)
+			//data.CA = sessionData.CAttr("CA").(string)
 			data.Activated = sessionData.Attr("Activated").(bool)
 		}
 
