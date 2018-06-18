@@ -35,6 +35,6 @@ func BuildHistory(client *ghint.Client, lang string) router.Handle {
 
 		build.Log = strings.Replace(build.Log, "\n", "<br>", -1)
 
-		t.ExecuteTemplate(c.Writer, "layout", build)
+		t.ExecuteTemplate(c.Writer, "layout", template.HTML(build.Log))
 	}
 }

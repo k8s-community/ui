@@ -36,7 +36,7 @@ image:
   ##
   registry: gcr.io/containers-206912
   name: k8s-community-ui
-  tag: 0.5.1
+  tag: 0.5.4
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
