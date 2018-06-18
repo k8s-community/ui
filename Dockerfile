@@ -13,6 +13,7 @@ ENV UIDB_PASSWORD k8scomm
 ENV UIDB_NAME k8s_community
 
 # additional env parameters
+ENV NAMESPACE=k8s_community
 ENV GITHUB_CLIENT_ID f778...
 ENV GITHUB_CLIENT_SECRET 807ff71...
 ENV GITHUB_OAUTH_STATE just-a-very-secret-state

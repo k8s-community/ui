@@ -2,16 +2,17 @@ package handlers
 
 import (
 	"html/template"
-
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
+	"github.com/k8s-community/ui/models"
 	"github.com/takama/router"
+	"gopkg.in/reform.v1"
 )
 
 // Home handles homepage request
-func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
+func Home(db *reform.DB, log logrus.FieldLogger, k8sToken string) router.Handle {
 	lang := "en"
 	return func(c *router.Control) {
 		t, err := template.ParseFiles(
@@ -29,6 +30,8 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 			Login            string // user's login
 			Activated        bool   // is user activated in k8s
 			GuestToken       string // a token to reach Kubernetes
+			Token            string // personal token
+			CA               string // personal cert
 		}{
 			GitHubSignInLink: "/oauth/github",
 			SignOutLink:      "/signout",
@@ -41,6 +44,10 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 			data.Login = sessionData.CAttr("Login").(string)
 			data.Activated = sessionData.Attr("Activated").(bool)
 		}
+
+		token, cert := GetToken(db, log, data.Login)
+		data.Token = token
+		data.CA = cert
 
 		t.ExecuteTemplate(c.Writer, "layout", data)
 	}
@@ -59,4 +66,25 @@ func NotFound(log logrus.FieldLogger) router.Handle {
 		log.Warningf("couldn't find path: %s", c.Request.RequestURI)
 		http.NotFound(c.Writer, c.Request)
 	}
+}
+
+func GetToken(db *reform.DB, logger logrus.FieldLogger, username string) (token string, cert string) {
+	st, err := db.FindOneFrom(models.UserTable, "name", username)
+	if err == reform.ErrNoRows {
+		logger.Infof("Show user token and cert: attention! Session is not found")
+	}
+
+	if err != nil {
+		logger.Errorf("Show user token and cert: attention! Couldn't get session from DB: %+v", err)
+	}
+
+	user := st.(*models.User)
+	if user.Token != nil {
+		token = *user.Token
+	}
+	if user.Cert != nil {
+		cert = *user.Cert
+	}
+
+	return token, cert
 }

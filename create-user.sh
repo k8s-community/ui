@@ -16,6 +16,10 @@ kubectl create rolebinding ${user}-admin \
   --serviceaccount=${user}:${user} \
   --namespace=${user}
 
+kubectl create rolebinding ${user}-view \
+  --clusterrole=view\
+  --serviceaccount=${user}:${user}
+
 kubectl get secret ${secret} -n ${user} -o json | jq -r '.data["ca.crt"]' | base64 -D > users/${user}.ca.crt
 user_token=$(kubectl get secret ${secret} -n ${user} -o json | jq -r '.data["token"]' | base64 -D)
 echo "token = ${user_token}"

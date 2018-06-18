@@ -8,18 +8,25 @@
 
     {{ if .Activated }}
         <p>Your Kubernetes environment was created.</p>
-
         <p>
-            <b>Step 2:</b> let's prepare the local environment. Please, follow
-            <a href="https://github.com/k8s-community/gophercon-eu/tree/master/k8s-local-env">
-                the instruction.
+        	While you are waiting for permissions, please install
+            <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a>.
+        </p>
+
+        {{ if .Token && .CA }}
+            <p>
+            <b>For the first part of the workshop:</b><br />
+            let's prepare the local environment. Please, follow
+            <a href="https://github.com/k8s-community/k8s-workshop-eu/blob/master/config-kubectl.md">
+            the instruction.
             </a>.
-            Your personal token is <code>{{ .GuestToken }}</code>.
-        </p>
-
-        <p>
-            <b>Step 3:</b> setup GitHub ingeration <a href="https://github.com/apps/k8s">here</a>.
-        </p>
+            Your personal token is <code>{{ .Token }}</code>.
+            Your ca.crt data is <br>
+            <code> {{ .CA }} </code>
+            </p>
+        {{ else }}
+		    Please, come back to this page later.
+        {{ end }}
 
     {{ else }}
         <p>

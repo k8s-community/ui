@@ -27,7 +27,7 @@ func (v *userTableType) Name() string {
 
 // Columns returns a new slice of column names for that view or table in SQL database.
 func (v *userTableType) Columns() []string {
-	return []string{"id", "name", "source", "session_id", "session_data", "created_at", "updated_at"}
+	return []string{"id", "name", "source", "session_id", "session_data", "token", "ca_crt", "created_at", "updated_at"}
 }
 
 // NewStruct makes a new struct for that view or table.
@@ -47,20 +47,22 @@ func (v *userTableType) PKColumnIndex() uint {
 
 // UserTable represents users view or table in SQL database.
 var UserTable = &userTableType{
-	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "users", Fields: []parse.FieldInfo{{Name: "ID", Type: "int64", Column: "id"}, {Name: "Name", Type: "string", Column: "name"}, {Name: "Source", Type: "string", Column: "source"}, {Name: "SessionID", Type: "*string", Column: "session_id"}, {Name: "SessionData", Type: "*string", Column: "session_data"}, {Name: "CreatedAt", Type: "time.Time", Column: "created_at"}, {Name: "UpdatedAt", Type: "time.Time", Column: "updated_at"}}, PKFieldIndex: 0},
+	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "users", Fields: []parse.FieldInfo{{Name: "ID", Type: "int64", Column: "id"}, {Name: "Name", Type: "string", Column: "name"}, {Name: "Source", Type: "string", Column: "source"}, {Name: "SessionID", Type: "*string", Column: "session_id"}, {Name: "SessionData", Type: "*string", Column: "session_data"}, {Name: "Token", Type: "*string", Column: "token"}, {Name: "Cert", Type: "*string", Column: "ca_crt"}, {Name: "CreatedAt", Type: "time.Time", Column: "created_at"}, {Name: "UpdatedAt", Type: "time.Time", Column: "updated_at"}}, PKFieldIndex: 0},
 	z: new(User).Values(),
 }
 
 // String returns a string representation of this struct or record.
 func (s User) String() string {
-	res := make([]string, 7)
+	res := make([]string, 9)
 	res[0] = "ID: " + reform.Inspect(s.ID, true)
 	res[1] = "Name: " + reform.Inspect(s.Name, true)
 	res[2] = "Source: " + reform.Inspect(s.Source, true)
 	res[3] = "SessionID: " + reform.Inspect(s.SessionID, true)
 	res[4] = "SessionData: " + reform.Inspect(s.SessionData, true)
-	res[5] = "CreatedAt: " + reform.Inspect(s.CreatedAt, true)
-	res[6] = "UpdatedAt: " + reform.Inspect(s.UpdatedAt, true)
+	res[5] = "Token: " + reform.Inspect(s.Token, true)
+	res[6] = "Cert: " + reform.Inspect(s.Cert, true)
+	res[7] = "CreatedAt: " + reform.Inspect(s.CreatedAt, true)
+	res[8] = "UpdatedAt: " + reform.Inspect(s.UpdatedAt, true)
 	return strings.Join(res, ", ")
 }
 
@@ -73,6 +75,8 @@ func (s *User) Values() []interface{} {
 		s.Source,
 		s.SessionID,
 		s.SessionData,
+		s.Token,
+		s.Cert,
 		s.CreatedAt,
 		s.UpdatedAt,
 	}
@@ -87,6 +91,8 @@ func (s *User) Pointers() []interface{} {
 		&s.Source,
 		&s.SessionID,
 		&s.SessionData,
+		&s.Token,
+		&s.Cert,
 		&s.CreatedAt,
 		&s.UpdatedAt,
 	}

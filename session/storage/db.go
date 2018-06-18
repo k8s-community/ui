@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"encoding/json"
+
 	"github.com/AlekSi/pointer"
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
