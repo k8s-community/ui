@@ -29,6 +29,8 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 			Login            string // user's login
 			Activated        bool   // is user activated in k8s
 			GuestToken       string // a token to reach Kubernetes
+			Token            string // personal token
+			CA               string // personal cert
 		}{
 			GitHubSignInLink: "/oauth/github",
 			SignOutLink:      "/signout",
@@ -39,6 +41,8 @@ func Home(log logrus.FieldLogger, k8sToken string) router.Handle {
 		sessionData := session.Get(c.Request)
 		if sessionData != nil {
 			data.Login = sessionData.CAttr("Login").(string)
+			data.Token = sessionData.CAttr("Token").(string)
+			data.CA = sessionData.CAttr("CA").(string)
 			data.Activated = sessionData.Attr("Activated").(bool)
 		}
 

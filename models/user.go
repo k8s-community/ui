@@ -18,6 +18,8 @@ type User struct {
 	Source      string    `reform:"source"`
 	SessionID   *string   `reform:"session_id"`
 	SessionData *string   `reform:"session_data"`
+	Token       *string   `reform:"token"`
+	Cert        *string   `reform:"ca_crt"`
 	CreatedAt   time.Time `reform:"created_at"`
 	UpdatedAt   time.Time `reform:"updated_at"`
 }

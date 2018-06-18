@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"encoding/json"
+
 	"github.com/AlekSi/pointer"
 	"github.com/Sirupsen/logrus"
 	"github.com/icza/session"
@@ -66,8 +67,16 @@ func (s *DB) Get(id string) session.Session {
 		return nil
 	}
 
+	var token, cert string
+	if user.Token != nil {
+		token = *user.Token
+	}
+	if user.Cert != nil {
+		cert = *user.Cert
+	}
+
 	sessionData := session.NewSessionOptions(&session.SessOptions{
-		CAttrs: map[string]interface{}{"Login": user.Name},
+		CAttrs: map[string]interface{}{"Login": user.Name, "Token": token, "CA": cert},
 		Attrs:  map[string]interface{}{"Activated": data.Activated, "HasError": data.HasError},
 	})
 
