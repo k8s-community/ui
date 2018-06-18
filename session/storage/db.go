@@ -67,16 +67,8 @@ func (s *DB) Get(id string) session.Session {
 		return nil
 	}
 
-	var token, cert string
-	if user.Token != nil {
-		token = *user.Token
-	}
-	if user.Cert != nil {
-		cert = *user.Cert
-	}
-
 	sessionData := session.NewSessionOptions(&session.SessOptions{
-		CAttrs: map[string]interface{}{"Login": user.Name, "Token": token, "CA": cert},
+		CAttrs: map[string]interface{}{"Login": user.Name},
 		Attrs:  map[string]interface{}{"Activated": data.Activated, "HasError": data.HasError},
 	})
 

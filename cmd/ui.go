@@ -131,7 +131,7 @@ func main() {
 
 	r := router.New()
 	r.Handler("GET", "/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
-	r.GET("/", handlers.Home(logger, k8sGuestToken))
+	r.GET("/", handlers.Home(db, logger, k8sGuestToken))
 	r.GET("/oauth/github", githubHandler.Login)
 	r.GET("/oauth/github-cb", githubHandler.Callback)
 	r.GET("/signout", handlers.Signout())
