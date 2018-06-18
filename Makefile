@@ -62,14 +62,14 @@ push: build
 .PHONY: run
 run: build
 	@echo "+ $@"
-	@docker run --name ${CONTAINER_NAME} -p ${K8SAPP_LOCAL_PORT}:${K8SAPP_LOCAL_PORT} \
+	docker run --name ${CONTAINER_NAME} -p ${K8SAPP_LOCAL_PORT}:${K8SAPP_LOCAL_PORT} \
 		-e "DB_CONNECTION_STRING=${DB_CONNECTION_STRING}" \
 		-e "K8SAPP_LOCAL_HOST=${K8SAPP_LOCAL_HOST}" \
 		-e "K8SAPP_LOCAL_PORT=${K8SAPP_LOCAL_PORT}" \
 		-e "K8SAPP_LOG_LEVEL=${K8SAPP_LOG_LEVEL}" \
 		-d $(CONTAINER_IMAGE):$(RELEASE)
-	@sleep 1
-	@docker logs ${CONTAINER_NAME}
+	sleep 1
+	docker logs ${CONTAINER_NAME}
 
 HAS_RUNNED := $(shell docker ps | grep ${CONTAINER_NAME})
 HAS_EXITED := $(shell docker ps -a | grep ${CONTAINER_NAME})
