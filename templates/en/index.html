@@ -1,5 +1,4 @@
 {{ define "content" }}
-<div class="ws-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
 {{ if .Login }}
 
 <div>
@@ -15,17 +14,22 @@
 
         {{ if .CA }}
             <p>
-            <b>For the first part of the workshop:</b><br />
-            let's prepare the local environment. Please, follow
-            <a href="https://github.com/k8s-community/k8s-workshop-eu/blob/master/config-kubectl.md">
-            the instruction.
-            </a>.
-            Your personal token is <code>{{ .Token }}</code>.
-            Your ca.crt data is <br>
-            <code> {{ .CA }} </code>
+                <b>For the first part of the workshop:</b><br />
+                let's prepare the local environment. Please, follow
+                <a href="https://github.com/k8s-community/k8s-workshop-eu/blob/master/config-kubectl.md">
+                    the instruction.
+                </a>.
+            </p>
+            <p>Your personal token is <code>{{ .Token }}</code>.</p>
+            <p>
+            	Your ca.crt data is <br>
+                <code> {{ .CA }} </code>
             </p>
         {{ else }}
-		    Please, come back to this page later.
+		    <p>
+		    	Your token hasn't been prepared yet.
+		    	Please, come back to this page later or contact the workshop instructors.
+            </p>
         {{ end }}
 
     {{ else }}
@@ -56,5 +60,4 @@
 </div>
 
 {{ end }}
-</div>
 {{ end }}
