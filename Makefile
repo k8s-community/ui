@@ -2,7 +2,7 @@ all: push
 
 APP?=ui
 PROJECT?=github.com/k8s-community/${APP}
-REGISTRY?=gcr.io/containers-206912
+REGISTRY?=gcr.io/ws-aug-16
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
