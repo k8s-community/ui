@@ -1,0 +1,27 @@
+version: "3"
+services:
+  db:
+    build: ./db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASS: mysecretpassword
+  ui:
+    build: .
+    ports:
+      - "8080:8080"
+    links:
+      - "db"
+    depends_on:
+      - "db"
+    environment:
+      UIDB_USER: postgres
+      UIDB_PASSWORD: mysecretpassword
+      UIDB_NAME: postgres
+      NAMESPACE:
+      DB_HOST: db
+      DB_PORT: 5432
+      SERVICE_HOST: 0.0.0.0
+      SERVICE_PORT: 8080
+

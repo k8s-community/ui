@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,18 +26,27 @@ import (
 var log logrus.Logger
 
 func main() {
+
+	// --use-service-discovery true|false
+
+	var serviceDiscovery = flag.Bool("sd", false, "service discovery")
+	flag.Parse()
+
 	log := logrus.New()
 	log.Formatter = new(logrus.TextFormatter)
 	log.Level = logrus.DebugLevel
 	logger := log.WithFields(logrus.Fields{"service": "ui"})
 
-	var errors []error
-
-	// Database settings
-	namespace, err := getFromEnv("NAMESPACE")
-	if err != nil {
-		errors = append(errors, err)
+	var namespace string
+	if *serviceDiscovery {
+		var err error
+		namespace, err = getFromEnv("NAMESPACE")
+		if err != nil {
+			logger.Fatalf("Namespace is not set: %+v", err)
+		}
 	}
+
+	var errors []error
 
 	dbUser, err := getFromEnv("UIDB_USER")
 	if err != nil {
@@ -57,8 +67,26 @@ func main() {
 		logger.Fatalf("Couldn't start service because required DB parameters are not set: %+v", errors)
 	}
 
-	dbHost := fmt.Sprintf("%s.%s", "uidb", namespace)
-	dbPort := "5432"
+	var dbHost, dbPort string
+
+	if len(namespace) == 0 {
+		var err error
+		dbHost, err = getFromEnv("DB_HOST")
+
+		if err != nil {
+			logger.Fatalf("Couldn't start service %+v", err)
+		}
+
+		dbPort, err = getFromEnv("DB_PORT")
+
+		if err != nil {
+			logger.Fatalf("Couldn't start service %+v", err)
+		}
+
+	} else {
+		dbHost = fmt.Sprintf("%s.%s", "uidb", namespace)
+		dbPort = "5432"
+	}
 
 	db, err := startupDB(dbHost, dbPort, dbUser, dbPass, dbName)
 	if err != nil {
