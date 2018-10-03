@@ -36,7 +36,7 @@ image:
   ##
   registry: registry.grahovac.me/default
   name: ui
-  tag: 0.5.8
+  tag: 0.5.10
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##
