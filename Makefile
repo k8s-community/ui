@@ -2,11 +2,11 @@ all: push
 
 APP?=ui
 PROJECT?=github.com/k8s-community/${APP}
-REGISTRY?=gcr.io/containers-206912
+REGISTRY?=gcr.io/ws-aug-16
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.5.8
+RELEASE?=0.5.10
 GOOS?=linux
 GOARCH?=amd64
 
@@ -63,10 +63,8 @@ push: build
 run: build
 	@echo "+ $@"
 	docker run --name ${CONTAINER_NAME} -p ${K8SAPP_LOCAL_PORT}:${K8SAPP_LOCAL_PORT} \
-		-e "DB_CONNECTION_STRING=${DB_CONNECTION_STRING}" \
-		-e "K8SAPP_LOCAL_HOST=${K8SAPP_LOCAL_HOST}" \
-		-e "K8SAPP_LOCAL_PORT=${K8SAPP_LOCAL_PORT}" \
-		-e "K8SAPP_LOG_LEVEL=${K8SAPP_LOG_LEVEL}" \
+		-e "SERVICE_HOST=${K8SAPP_LOCAL_HOST}" \
+		-e "SERVICE_PORT=${K8SAPP_LOCAL_PORT}" \
 		-d $(CONTAINER_IMAGE):$(RELEASE)
 	sleep 1
 	docker logs ${CONTAINER_NAME}
