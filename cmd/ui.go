@@ -29,7 +29,7 @@ func main() {
 
 	// --use-service-discovery true|false
 
-	var serviceDiscovery = flag.Bool("sd", false, "service discovery")
+	var serviceDiscovery = flag.Bool("sd", true, "service discovery")
 	flag.Parse()
 
 	log := logrus.New()
