@@ -30,7 +30,7 @@ func BuildHistory(client *ghint.Client, lang string) router.Handle {
 		uuid := c.Get(":uuid")
 		build, err := client.Build.ShowResults(uuid)
 		if err != nil {
-			// todo
+			log.Printf("couldn't get build logs: %v", err)
 		}
 
 		build.Log = strings.Replace(build.Log, "\n", "<br>", -1)
