@@ -1,6 +1,6 @@
 name: ui
 description: A Helm chart for UI
-version: 0.6.8
+version: 0.6.9
 home: https://k8s.community/
 sources:
   - https://github.com/k8s-community/ui
