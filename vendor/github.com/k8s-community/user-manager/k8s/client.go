@@ -2,11 +2,13 @@ package k8s
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/client-go/pkg/apis/rbac/v1beta1"
 	"k8s.io/client-go/rest"
 )
 
@@ -25,8 +27,9 @@ type Client struct {
 // NewClient initializes client for k8s API
 func NewClient(baseURL string, bearerToken string) (*Client, error) {
 	config := &rest.Config{
-		Host:        baseURL,
-		BearerToken: bearerToken,
+		Host:            baseURL,
+		BearerToken:     bearerToken,
+		TLSClientConfig: rest.TLSClientConfig{Insecure: true}, // todo: use cacert instead
 	}
 
 	c, err := kubernetes.NewForConfig(config)
@@ -67,6 +70,69 @@ func (c *Client) CreateNamespace(namespaceName string) error {
 	}
 
 	return nil
+}
+
+// CreateNamespaceAdmin creates admin service account.
+func (c *Client) CreateNamespaceAdmin(namespace string) error {
+	sa := &v1.ServiceAccount{}
+	sa.APIVersion = "v1"
+	sa.Kind = "ServiceAccount"
+	sa.ObjectMeta.Name = namespace
+	sa.ObjectMeta.Namespace = namespace
+
+	_, err := c.client.ServiceAccounts(namespace).Create(sa)
+	if err != nil {
+		return fmt.Errorf("cannot create service account: %s", err)
+	}
+
+	rb := &v1beta1.RoleBinding{}
+	subj := v1beta1.Subject{
+		Kind:      "ServiceAccount",
+		Name:      namespace,
+		Namespace: namespace,
+	}
+	rb.Kind = "RoleBinding"
+	rb.ObjectMeta.Name = namespace + "-admin"
+	rb.Subjects = append(rb.Subjects, subj)
+	rb.RoleRef = v1beta1.RoleRef{
+		APIGroup: "rbac.authorization.k8s.io",
+		Name:     "admin",
+		Kind:     "ClusterRole",
+	}
+
+	_, err = c.client.RbacV1beta1Client.RoleBindings(namespace).Create(rb)
+	if err != nil {
+		return fmt.Errorf("cannot create role binding: %s", err)
+	}
+
+	return nil
+}
+
+func (c *Client) GetNamespaceToken(namespace string) (*Token, error) {
+	secrets, err := c.client.Secrets(namespace).List(meta_v1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("cannot get lis of secrets: %s", err)
+	}
+
+	var tokenSecr v1.Secret
+	found := false
+	for _, secr := range secrets.Items {
+		if strings.HasPrefix(secr.ObjectMeta.Name, namespace+"-token") {
+			tokenSecr = secr
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return nil, fmt.Errorf("cannot find token secret")
+	}
+
+	tok := Token{
+		Cert:  string(tokenSecr.Data["ca.crt"]),
+		Token: string(tokenSecr.Data["token"]),
+	}
+	return &tok, nil
 }
 
 // CopySecret creates copy of secret with name secretName from defined namespace

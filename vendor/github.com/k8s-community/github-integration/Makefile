@@ -8,7 +8,7 @@ REGISTRY?=docker.io/k8sc
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.8.1
+RELEASE?=0.8.2
 GOOS?=linux
 GOARCH?=amd64
 
@@ -95,7 +95,9 @@ endif
 
 .PHONY: deploy
 deploy: push
-	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts --kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} --version=${RELEASE} -i --wait
+	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts \
+		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} --version=${RELEASE} -i --wait \
+		--set image.registry=${REGISTRY} --set image.name=${CONTAINER_NAME} --set image.tag=${RELEASE}
 
 .PHONY: fmt
 fmt:

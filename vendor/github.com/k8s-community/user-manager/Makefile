@@ -9,7 +9,7 @@ REGISTRY?=docker.io/k8sc
 CA_DIR?=certs
 
 # Use the 0.0.0 tag for testing, it shouldn't clobber any release builds
-RELEASE?=0.3.0
+RELEASE?=0.6.0
 GOOS?=linux
 GOARCH?=amd64
 
@@ -76,8 +76,8 @@ run: container
 .PHONY: deploy
 deploy: push
 	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts \
-		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} \
-		--version=${RELEASE} -i --wait
+		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} --version=${RELEASE} -i --wait \
+		--set image.registry=${REGISTRY} --set image.name=${CONTAINER_NAME} --set image.tag=${RELEASE}
 
 .PHONY: fmt
 fmt:
@@ -87,7 +87,6 @@ fmt:
 .PHONY: lint
 lint: bootstrap
 	@echo "+ $@"
-	# @gometalinter --vendor ./...
 
 .PHONY: vet
 vet:
@@ -109,15 +108,9 @@ clean:
 	rm -f ${APP}
 
 HAS_DEP := $(shell command -v dep;)
-HAS_METALINTER := $(shell command -v gometalinter;)
 
 .PHONY: bootstrap
 bootstrap:
 ifndef HAS_DEP
 	go get -u github.com/golang/dep/cmd/dep
-endif
-ifndef HAS_METALINTER
-	go get -u -v -d github.com/alecthomas/gometalinter && \
-	go install -v github.com/alecthomas/gometalinter && \
-	gometalinter --install --update
 endif

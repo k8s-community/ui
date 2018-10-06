@@ -93,7 +93,7 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session, w http
 	logger.Infof("Session was created")
 
 	user := umClient.NewUser(login)
-	status, err := h.usermanClient.User.Sync(user)
+	token, resp, err := h.usermanClient.User.Sync(user)
 
 	if err != nil {
 		logger.Info("Error during user Kubernetes sync: %+v", err)
@@ -103,10 +103,14 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session, w http
 		return
 	}
 
-	logger.Infof("Status from user-manager service is: %d", status)
+	logger.Infof("Status from user-manager service is: %d", resp.Status)
 
 	sessionData.SetAttr("Activated", true)
 	sessionData.SetAttr("HasError", false)
+
+	sessionData.SetAttr("Cert", token.Cert)
+	sessionData.SetAttr("Token", token.Token)
+
 	session.Add(sessionData, w)
 
 	logger.Infof("Session was updated: set 'activated' value")

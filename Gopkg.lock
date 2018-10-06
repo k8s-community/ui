@@ -40,14 +40,14 @@
 [[projects]]
   name = "github.com/k8s-community/github-integration"
   packages = ["client"]
-  revision = "5be6f2cf6aea469328c1e538f37bd6f3c12ab9e2"
-  version = "0.8.1"
+  revision = "92ab291cf95d663862b11bc3b5e6d45a6f53dc3c"
+  version = "0.8.2"
 
 [[projects]]
   name = "github.com/k8s-community/user-manager"
   packages = ["client"]
-  revision = "49b5f592312bf1db6eceec0ca9ff776916273623"
-  version = "0.3.0"
+  revision = "00275b03885310deeb108aa8cfcd16df9d4c3de0"
+  version = "0.6.0"
 
 [[projects]]
   branch = "master"
@@ -106,6 +106,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aa283f7fd10bcb9b0e7ef0a6417e409e0c96cb9ae4eec42c4df8545b5dbb1256"
+  inputs-digest = "09b64c9762e24451be8b40569ac1c89bca59922ad16bcc8c3b21f2d51c37c0c8"
   solver-name = "gps-cdcl"
   solver-version = 1

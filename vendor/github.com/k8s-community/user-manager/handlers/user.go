@@ -40,7 +40,7 @@ func (h *Handler) SyncUser(c *router.Control) {
 
 	h.Infolog.Printf("try to activate user %s", user.Name)
 
-	client, err := k8s.NewClient(h.Env["K8S_BASE_URL"], h.Env["K8S_TOKEN"])
+	client, err := k8s.NewClient("https://master.k8s.community:443", h.Env["K8S_TOKEN"])
 	if err != nil {
 		h.Errlog.Printf("cannot connect to k8s server: %s", err)
 		c.Code(http.StatusInternalServerError).Body(nil)
@@ -72,7 +72,22 @@ func (h *Handler) SyncUser(c *router.Control) {
 		}
 	}
 
-	c.Code(http.StatusOK).Body(nil)
+	err = client.CreateNamespaceAdmin(k8sUser)
+	if err != nil {
+		h.Errlog.Printf("%s", err)
+		c.Code(http.StatusInternalServerError).Body(nil)
+		return
+	}
+
+	tok, err := client.GetNamespaceToken(k8sUser)
+	if err != nil {
+		h.Errlog.Printf("%s", err)
+		c.Code(http.StatusInternalServerError).Body(nil)
+		return
+	}
+
+	h.Infolog.Printf("the token is: %v", tok)
+	c.Code(http.StatusOK).Body(tok)
 
 	h.Infolog.Printf("user %s is activated", k8sUser)
 }

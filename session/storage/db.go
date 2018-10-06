@@ -117,6 +117,13 @@ func (s *DB) Add(sess session.Session) {
 
 	user.SessionData = pointer.ToString(string(jsData))
 
+	if token, ok := sess.Attr("Token").(string); ok {
+		user.Token = &token
+	}
+	if cert, ok := sess.Attr("Cert").(string); ok {
+		user.Cert = &cert
+	}
+
 	err = s.db.Save(user)
 	if err != nil {
 		logger.Errorf("Couldn't save session in database %+v: %+v", user, err)

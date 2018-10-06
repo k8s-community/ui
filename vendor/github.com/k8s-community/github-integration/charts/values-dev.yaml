@@ -36,7 +36,7 @@ image:
   ##
   registry: registry.grahovac.me/default
   name: github-integration
-  tag: 0.8.1
+  tag: 0.8.2
 
   ## Docker Registry/Hub auth secret name, always use `registry-pull-secret` if registry inside if k8s
   ##

@@ -1,7 +1,5 @@
 package client
 
-import "net/http"
-
 const (
 	userUrlStr = "/sync-user"
 )
@@ -12,18 +10,19 @@ type UserService struct {
 }
 
 // Sync sends request for user activation in k8s system
-func (u *UserService) Sync(user *User) (int, error) {
+func (u *UserService) Sync(user *User) (*Token, *Response, error) {
 	req, err := u.client.NewRequest(putMethod, userUrlStr, user)
 	if err != nil {
-		return http.StatusBadRequest, err
+		return nil, nil, err
 	}
 
-	resp, err := u.client.Do(req, nil)
+	token := &Token{}
+	resp, err := u.client.Do(req, token)
 	if err != nil {
-		return http.StatusBadRequest, err
+		return nil, resp, err
 	}
 
-	return resp.StatusCode, nil
+	return token, resp, nil
 }
 
 // User defines
