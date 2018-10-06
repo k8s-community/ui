@@ -96,14 +96,14 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session, w http
 	token, resp, err := h.usermanClient.User.Sync(user)
 
 	if err != nil {
-		logger.Info("Error during user Kubernetes sync: %+v", err)
+		logger.Infof("Error during user Kubernetes sync: %+v", err)
 		sessionData.SetAttr("Activated", false)
 		sessionData.SetAttr("HasError", true)
 		session.Add(sessionData, w)
 		return
 	}
 
-	logger.Infof("Status from user-manager service is: %d", resp.Status)
+	logger.Infof("Status from user-manager service is: %s", resp.Status)
 
 	sessionData.SetAttr("Activated", true)
 	sessionData.SetAttr("HasError", false)
