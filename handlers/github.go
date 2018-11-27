@@ -108,8 +108,10 @@ func (h *GitHubOAuth) syncUser(login string, sessionData session.Session, w http
 	sessionData.SetAttr("Activated", true)
 	sessionData.SetAttr("HasError", false)
 
-	sessionData.SetAttr("Cert", token.Cert)
-	sessionData.SetAttr("Token", token.Token)
+	if token.Cert != "" && token.Token != "" {
+		sessionData.SetAttr("Cert", token.Cert)
+		sessionData.SetAttr("Token", token.Token)
+	}
 
 	session.Add(sessionData, w)
 
